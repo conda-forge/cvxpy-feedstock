@@ -82,9 +82,11 @@ outputs:
 
 about:
   home: http://www.cvxpy.org/
-  license: Apache License, Version 2.0
+  license: Apache 2.0
+  license_family: Apache
+  # In recipe for now; will be in source package in future release
+  license_file: {{ environ['RECIPE_DIR'] }}/LICENSE
   summary: 'A domain-specific language for modeling convex optimization problems in Python.'
-  license_file: LICENSE  # in recipe for now, will be in next release
   description: |
     CVXPY is a Python-embedded modeling language for convex optimization
     problems. It allows you to express your problem in a natural way that
