@@ -10,46 +10,81 @@ source:
   sha256: a1b5b3ac31f6ed02649196c34e9b2d23320f170a7b05d6796029d9e7d4fc78d1
 
 build:
-  number: 0
-  script: python -m pip install --no-deps --ignore-installed .
-  skip: true  # dependencies missing on:  # [win]
+  number: 1
 
 requirements:
-  build:
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
   host:
-    - python
-    - pip
-    - numpy 1.14
+    - python {{ python }}
   run:
-    - python
+    - cvxpy-base
     - osqp
     - ecos >=2
     - scs >=1.1.3
-    - multiprocess
-    - fastcache
-    - six
-    - toolz
-    - {{ pin_compatible('numpy') }}
-    - scipy >=0.19
 
 test:
-  imports:
-    - cvxpy
-    - cvxpy.cvxcore
-    - cvxpy.cvxcore.python
   requires:
     - nose
+  imports:
+    - cvxpy
+    - cvxpy.atoms
+    - cvxpy.atoms.affine
+    - cvxpy.atoms.elementwise
+    - cvxpy.cvxcore
+    - cvxpy.cvxcore.python
+    - cvxpy.constraints
+    - cvxpy.expressions
+    - cvxpy.expressions.constants
+    - cvxpy.interface
+    - cvxpy.interface.numpy_interface
+    - cvxpy.lin_ops
+    - cvxpy.problems
+    - cvxpy.problems.problem_data
+    - cvxpy.problems.solvers
+    - cvxpy.reductions
+    - cvxpy.reductions.complex2real
+    - cvxpy.reductions.complex2real.atom_canonicalizers
+    - cvxpy.reductions.dcp2cone
+    - cvxpy.reductions.dcp2cone.atom_canonicalizers
+    - cvxpy.reductions.eliminate_pwl
+    - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
+    - cvxpy.reductions.qp2quad_form
+    - cvxpy.reductions.qp2quad_form.atom_canonicalizers
+    - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
+    - cvxpy.reductions.solvers
+    - cvxpy.reductions.solvers.conic_solvers
+    - cvxpy.reductions.solvers.qp_solvers
+    - cvxpy.reductions.solvers.lp_solvers
+    - cvxpy.tests
+    - cvxpy.transforms
+    - cvxpy.utilities
+    - cvxpy.cvxcore.python
   commands:
     - nosetests cvxpy
 
+outputs:
+  - name: cvxpy-base
+    requirements:
+      host:
+        - python {{ python }}
+        - numpy {{ numpy }}
+        - setuptools
+      build:
+        - {{ compiler('cxx') }}
+      run:
+        - python
+        - {{ pin_compatible('numpy') }}
+        - scipy >=0.15
+        - multiprocess
+        - fastcache
+        - toolz
+    build:
+      script: {{ PYTHON }} setup.py install --single-version-externally-managed --record record.txt
+
 about:
   home: http://www.cvxpy.org/
-  license: Apache-2.0
-  license_family: Apache
+  license: Apache License, Version 2.0
+  summary: 'A domain-specific language for modeling convex optimization problems in Python.'
   license_file: LICENSE  # in recipe for now, will be in next release
-  summary: 'A Python-embedded modeling language for convex optimization problems'
   description: |
     CVXPY is a Python-embedded modeling language for convex optimization
     problems. It allows you to express your problem in a natural way that
@@ -61,3 +96,4 @@ about:
 extra:
   recipe-maintainers:
     - dougalsutherland
+    - mcg1969
