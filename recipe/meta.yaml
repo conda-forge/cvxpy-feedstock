@@ -47,7 +47,7 @@ outputs:
         - nosetests cvxpy
   - name: cvxpy-base
     build:
-      script: "{{ PYTHON }} -m pip install . -vvv"
+      script: "{{ PYTHON }} -m pip install . --no-deps -vvv"
     requirements:
       build:
         - {{ compiler('c') }}
