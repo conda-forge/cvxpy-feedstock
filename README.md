@@ -20,7 +20,7 @@ Current build status
 
 [![Linux](https://img.shields.io/circleci/project/github/conda-forge/cvxpy-feedstock/master.svg?label=Linux)](https://circleci.com/gh/conda-forge/cvxpy-feedstock)
 [![OSX](https://img.shields.io/travis/conda-forge/cvxpy-feedstock/master.svg?label=macOS)](https://travis-ci.org/conda-forge/cvxpy-feedstock)
-[![Windows](https://img.shields.io/appveyor/ci/conda-forge/cvxpy-feedstock/master.svg?label=Windows)](https://ci.appveyor.com/project/conda-forge/cvxpy-feedstock/branch/master)
+![Windows disabled](https://img.shields.io/badge/Windows-disabled-lightgrey.svg)
 
 Current release info
 ====================
