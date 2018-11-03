@@ -28,6 +28,7 @@ Current release info
 | Name | Downloads | Version | Platforms |
 | --- | --- | --- | --- |
 | [![Conda Recipe](https://img.shields.io/badge/recipe-cvxpy-green.svg)](https://anaconda.org/conda-forge/cvxpy) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/cvxpy.svg)](https://anaconda.org/conda-forge/cvxpy) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cvxpy.svg)](https://anaconda.org/conda-forge/cvxpy) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/cvxpy.svg)](https://anaconda.org/conda-forge/cvxpy) |
+| [![Conda Recipe](https://img.shields.io/badge/recipe-cvxpy--base-green.svg)](https://anaconda.org/conda-forge/cvxpy-base) | [![Conda Downloads](https://img.shields.io/conda/dn/conda-forge/cvxpy-base.svg)](https://anaconda.org/conda-forge/cvxpy-base) | [![Conda Version](https://img.shields.io/conda/vn/conda-forge/cvxpy-base.svg)](https://anaconda.org/conda-forge/cvxpy-base) | [![Conda Platforms](https://img.shields.io/conda/pn/conda-forge/cvxpy-base.svg)](https://anaconda.org/conda-forge/cvxpy-base) |
 
 Installing cvxpy
 ================
@@ -38,10 +39,10 @@ Installing `cvxpy` from the `conda-forge` channel can be achieved by adding `con
 conda config --add channels conda-forge
 ```
 
-Once the `conda-forge` channel has been enabled, `cvxpy` can be installed with:
+Once the `conda-forge` channel has been enabled, `cvxpy, cvxpy-base` can be installed with:
 
 ```
-conda install cvxpy
+conda install cvxpy cvxpy-base
 ```
 
 It is possible to list all of the versions of `cvxpy` available on your platform with:
