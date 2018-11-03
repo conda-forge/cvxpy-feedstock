@@ -10,7 +10,7 @@ source:
   sha256: bd362f638c661cd532451948892647580d8726d5b70b557cdca3ebb993a23282
 
 build:
-  number: 1
+  number: 1001
   skip: true  # solvers are missing on:  # [win]
 
 # Need these up here for conda-smithy to handle them properly.
