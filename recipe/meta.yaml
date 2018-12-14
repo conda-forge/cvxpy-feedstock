@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.0.10" %}
+{% set version = "1.0.11" %}
 
 package:
   name: {{ name|lower }}
@@ -7,10 +7,10 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: bd362f638c661cd532451948892647580d8726d5b70b557cdca3ebb993a23282
+  sha256: 2bb602a25bdef9942c8600b8d0d82868f6789b0c855e2777a93f9bd7b53efb31
 
 build:
-  number: 1001
+  number: 1000
   skip: true  # solvers are missing on:  # [win]
 
 # Need these up here for conda-smithy to handle them properly.
