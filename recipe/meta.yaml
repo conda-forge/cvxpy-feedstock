@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.0.14" %}
+{% set version = "1.0.15" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 5bb2e641945386107842d2a026763dcfc0b09964dc4beecb5da709f46c930b86
+  sha256: dff246a3fa03fe5c815f290825345a6ad5ff49df5e1882f123e632a4217bbcd1
 
 build:
   number: 0
