@@ -10,7 +10,7 @@ source:
   sha256: dff246a3fa03fe5c815f290825345a6ad5ff49df5e1882f123e632a4217bbcd1
 
 build:
-  number: 0
+  number: 1
   skip: true  # solvers are missing on:  # [win]
 
 # Need these up here for conda-smithy to handle them properly.
@@ -57,11 +57,10 @@ outputs:
       run:
         - python
         - {{ pin_compatible('numpy') }}
-        - scipy >=0.19
+        - scipy >=1.1.0
         - multiprocess
         - fastcache
         - six
-        - toolz
     test:
       imports:
         - cvxpy
