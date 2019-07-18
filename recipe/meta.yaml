@@ -52,7 +52,7 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
-        - numpy 1.14
+        - numpy 1.15
         - pip
       run:
         - python
