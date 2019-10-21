@@ -52,8 +52,8 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
-        - numpy 1.15  # [(not aarch64) and (not  ppc64le)]
-        - numpy 1.16  # [aarch64 or ppc64le]         #numpy 1.15 (or lower) was never built for aarch64/ppc64le
+        - numpy 1.15  # [x86_64]
+        - numpy 1.16  # [aarch64 or ppc64le]
         - pip
       run:
         - python
