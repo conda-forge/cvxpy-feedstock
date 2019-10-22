@@ -11,7 +11,8 @@ source:
 
 build:
   number: 2
-  skip: true  # [py==27 and (win or (not x86_64))]
+  skip: true  # [py==27 and win]
+  skip: true  # [py==27 and not x86_64]
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
