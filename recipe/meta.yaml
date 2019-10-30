@@ -10,8 +10,9 @@ source:
   sha256: 8535529ddb807067b0d59661dce1d9a6ddb2a218398a38ea7772328ad8a6ea13
 
 build:
-  number: 1
-  skip: true  # solvers are missing on:  # [win and py==27]
+  number: 2
+  skip: true  # [py==27 and win]
+  skip: true  # [py==27 and not x86_64]
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
@@ -52,7 +53,8 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
-        - numpy 1.15
+        - numpy 1.15  # [x86_64]
+        - numpy 1.16  # [aarch64 or ppc64le]
         - pip
       run:
         - python
