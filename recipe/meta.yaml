@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.0.25" %}
+{% set version = "1.0.21" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 8535529ddb807067b0d59661dce1d9a6ddb2a218398a38ea7772328ad8a6ea13
+  sha256: bb9b31e9bc97f739f1e3a49311aad4c89d087bae1980bc32b32d9ec5dacb0d86
 
 build:
   number: 2
@@ -89,3 +89,4 @@ extra:
   recipe-maintainers:
     - dougalsutherland
     - mcg1969
+    - scopatz
