@@ -10,7 +10,7 @@ source:
   sha256: bb9b31e9bc97f739f1e3a49311aad4c89d087bae1980bc32b32d9ec5dacb0d86
 
 build:
-  number: 2
+  number: 0
   skip: true  # [py==27 and win]
   skip: true  # [py==27 and not x86_64]
 
