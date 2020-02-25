@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.0.21" %}
+{% set version = "1.0.28" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: bb9b31e9bc97f739f1e3a49311aad4c89d087bae1980bc32b32d9ec5dacb0d86
+  sha256: 212cd483e9a0fbc91d593aa599eb065615b058189f66c7881521b63e6493307a
 
 build:
   number: 0
@@ -46,7 +46,7 @@ outputs:
         - nosetests cvxpy
   - name: cvxpy-base
     build:
-      script: "{{ PYTHON }} -m pip install . --no-deps -vvv"
+      script: {{ PYTHON }} -m pip install . --no-deps -vvv
     requirements:
       build:
         - {{ compiler('c') }}
@@ -76,7 +76,7 @@ about:
   license: Apache-2.0
   license_family: Apache
   license_file: LICENSE
-  summary: 'A Python-embedded modeling language for convex optimization problems'
+  summary: A Python-embedded modeling language for convex optimization problems
   description: |
     CVXPY is a Python-embedded modeling language for convex optimization
     problems. It allows you to express your problem in a natural way that
