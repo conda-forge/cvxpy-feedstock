@@ -9,7 +9,7 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 212cd483e9a0fbc91d593aa599eb065615b058189f66c7881521b63e6493307a
   patches:
-    - patches/0001-remove-requires-from-setup.py-and-pyproject.toml.patch
+    - patches/0001-remove-pyproject.toml-requires-in-setup.py.patch
 
 build:
   number: 0
@@ -57,6 +57,9 @@ outputs:
         - numpy 1.15  # [py<38 and x86_64]
         - numpy 1.16  # [py<38 and not x86_64]
         - numpy 1.17  # [py>=38]
+        - wheel
+        - setuptools
+        - scipy >=1.1.0
       host:
         - python
         # awkward matrix of "oldest on conda-forge >=1.15"
