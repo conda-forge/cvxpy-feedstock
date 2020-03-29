@@ -51,7 +51,7 @@ outputs:
       build:
         - {{ compiler('c') }}
         - {{ compiler('cxx') }}
-        - conda-build < 3.8.12
+        - conda-build < 3.18.12
       host:
         - python
         # awkward matrix of "oldest on conda-forge >=1.15"
