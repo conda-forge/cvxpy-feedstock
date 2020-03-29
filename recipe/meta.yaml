@@ -57,7 +57,7 @@ outputs:
         - numpy 1.15  # [py<38 and x86_64]
         - numpy 1.16  # [py<38 and not x86_64]
         - numpy 1.17  # [py>=38]
-        - pip
+        - pip !=20.0.2
       run:
         - python
         - {{ pin_compatible('numpy') }}
