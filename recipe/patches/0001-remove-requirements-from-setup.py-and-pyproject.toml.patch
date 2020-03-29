@@ -1,0 +1,48 @@
+From c954b137638aab6b41401e371cdc1f074beda48f Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 29 Mar 2020 16:10:06 +0200
+Subject: [PATCH] remove requirements from setup.py and pyproject.toml
+
+---
+ pyproject.toml |  3 ++-
+ setup.py       | 15 ++++++++-------
+ 2 files changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/pyproject.toml b/pyproject.toml
+index 21722a56..dc82153f 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,2 +1,3 @@
+ [build-system]
+-requires = ["numpy >= 1.15", "scipy >= 1.1.0", "setuptools>=40.8.0", "wheel"]
+\ No newline at end of file
++### conda recipe takes care of installing requirements
++# requires = ["numpy >= 1.15", "scipy >= 1.1.0", "setuptools>=40.8.0", "wheel"]
+diff --git a/setup.py b/setup.py
+index 90ed0fc6..328e3bab 100644
+--- a/setup.py
++++ b/setup.py
+@@ -65,12 +65,13 @@ setup(
+     license='Apache License, Version 2.0',
+     zip_safe=False,
+     description='A domain-specific language for modeling convex optimization problems in Python.',
+-    install_requires=["osqp >= 0.4.1",
+-                      "ecos >= 2",
+-                      "scs >= 1.1.3",
+-                      "multiprocess",
+-                      "numpy >= 1.15",
+-                      "scipy >= 1.1.0"],
+-    setup_requires=["numpy >= 1.15"],
++    ### conda recipe takes care of installing requirements
++    # install_requires=["osqp >= 0.4.1",
++    #                   "ecos >= 2",
++    #                   "scs >= 1.1.3",
++    #                   "multiprocess",
++    #                   "numpy >= 1.15",
++    #                   "scipy >= 1.1.0"],
++    # setup_requires=["numpy >= 1.15"],
+     use_2to3=True,
+ )
+-- 
+2.24.0.windows.2
+

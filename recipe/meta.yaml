@@ -9,7 +9,7 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 212cd483e9a0fbc91d593aa599eb065615b058189f66c7881521b63e6493307a
   patches:
-    - patches/0001-remove-requirements-from-setup.py.patch
+    - patches/0001-remove-requirements-from-setup.py-and-pyproject.toml.patch
 
 build:
   number: 0
