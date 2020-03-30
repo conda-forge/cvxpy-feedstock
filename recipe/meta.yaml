@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.0.27" %}
+{% set version = "1.0.28" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,9 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: e7c61b6f312cc1e5e25783378b4f6c0ff70f682b5226c5b3054a6d6f72a0e757
+  sha256: 212cd483e9a0fbc91d593aa599eb065615b058189f66c7881521b63e6493307a
+  patches:
+    - patches/0001-remove-pyproject.toml-requires-in-setup.py.patch
 
 build:
   number: 0
