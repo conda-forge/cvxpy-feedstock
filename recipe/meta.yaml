@@ -1,4 +1,4 @@
-{% set name = "cvxpy" %}
+{% set name = "cvxpy-packages" %}
 {% set version = "1.0.28" %}
 
 package:
