@@ -1,8 +1,8 @@
-{% set name = "cvxpy-packages" %}
+{% set name = "cvxpy" %}
 {% set version = "1.0.28" %}
 
 package:
-  name: {{ name|lower }}
+  name: cvxpy-packages
   version: {{ version }}
 
 source:
