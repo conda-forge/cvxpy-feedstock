@@ -47,6 +47,7 @@ outputs:
   - name: cvxpy-base
     build:
       script: {{ PYTHON }} -m pip install . --no-deps -vvv
+      activate_in_script: True
     requirements:
       build:
         - {{ compiler('c') }}
