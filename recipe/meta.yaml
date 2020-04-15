@@ -55,10 +55,11 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
-        # awkward matrix of "oldest on conda-forge >=1.15"
-        - numpy 1.15  # [py<38 and x86_64]
-        - numpy 1.16  # [py<38 and not x86_64]
-        - numpy 1.17  # [py>=38]
+        # very awkward matrix of "oldest on conda-forge >=1.15"
+        - numpy 1.15  # [python_impl != "pypy" and py<38 and x86_64]
+        - numpy 1.16  # [python_impl != "pypy" and py<38 and not x86_64]
+        - numpy 1.17  # [python_impl != "pypy" and py>=38]
+        - numpy 1.18  # [python_impl == "pypy"]
         - pip
       run:
         - python
