@@ -12,7 +12,7 @@ source:
     - patches/0001-remove-pyproject.toml-requires-in-setup.py.patch
 
 build:
-  number: 0
+  number: 1
   skip: true  # [py==27 and win]
   skip: true  # [py==27 and not x86_64]
 
