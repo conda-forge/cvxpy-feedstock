@@ -12,14 +12,14 @@ cxx_compiler_version:
 - '8'
 docker_image:
 - condaforge/linux-anvil-ppc64le
+numpy:
+- '1.16'
 pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
 python:
 - 3.6.* *_cpython
-python_impl:
-- cpython
 zip_keys:
-- - python
-  - python_impl
+- - numpy
+  - python
