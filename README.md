@@ -30,7 +30,7 @@ Current build status
     <td>Drone</td>
     <td>
       <a href="https://cloud.drone.io/conda-forge/cvxpy-feedstock">
-        <img alt="linux" src="https://img.shields.io/drone/build/conda-forge/master.svg?label=Linux">
+        <img alt="linux" src="https://img.shields.io/drone/build/conda-forge/cvxpy-feedstock/master.svg?label=Linux">
       </a>
     </td>
   </tr>
@@ -282,7 +282,7 @@ Feedstock Maintainers
 
 * [@SteveDiamond](https://github.com/SteveDiamond/)
 * [@akshayka](https://github.com/akshayka/)
-* [@dougalsutherland](https://github.com/dougalsutherland/)
+* [@djsutherland](https://github.com/djsutherland/)
 * [@h-vetinari](https://github.com/h-vetinari/)
 * [@mcg1969](https://github.com/mcg1969/)
 * [@rileyjmurray](https://github.com/rileyjmurray/)
