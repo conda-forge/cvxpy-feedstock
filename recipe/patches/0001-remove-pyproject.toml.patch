@@ -1,0 +1,22 @@
+From 8fe0490f0aed16a7cb2907ba33f26c7fa1810d68 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sun, 29 Mar 2020 17:50:48 +0200
+Subject: [PATCH] remove pyproject.toml
+
+---
+ pyproject.toml | 2 --
+ 1 file changed, 2 deletions(-)
+ delete mode 100644 pyproject.toml
+
+diff --git a/pyproject.toml b/pyproject.toml
+deleted file mode 100644
+index 21722a56..00000000
+--- a/pyproject.toml
++++ /dev/null
+@@ -1,2 +0,0 @@
+-[build-system]
+-requires = ["numpy >= 1.15", "scipy >= 1.1.0", "setuptools>=40.8.0", "wheel"]
+\ No newline at end of file
+-- 
+2.26.2.windows.1
+
