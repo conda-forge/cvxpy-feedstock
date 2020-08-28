@@ -64,7 +64,6 @@ outputs:
         - {{ pin_compatible('numpy') }}
         - scipy >=1.1.0
         - multiprocess
-        - six
     test:
       imports:
         - cvxpy
