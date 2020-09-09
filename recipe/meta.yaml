@@ -46,6 +46,7 @@ outputs:
         - nose
       commands:
         - nosetests cvxpy
+
   - name: cvxpy-base
     build:
       script: {{ PYTHON }} -m pip install . --no-deps -vvv
@@ -62,12 +63,38 @@ outputs:
         - python
         - {{ pin_compatible('numpy') }}
         - scipy >=1.1.0
-        - multiprocess
-        - six
     test:
       imports:
         - cvxpy
+        - cvxpy.atoms
+        - cvxpy.atoms.affine
+        - cvxpy.atoms.elementwise
         - cvxpy.cvxcore
+        - cvxpy.cvxcore.python
+        - cvxpy.constraints
+        - cvxpy.expressions
+        - cvxpy.expressions.constants
+        - cvxpy.interface
+        - cvxpy.interface.numpy_interface
+        - cvxpy.lin_ops
+        - cvxpy.problems
+        - cvxpy.reductions
+        - cvxpy.reductions.complex2real
+        - cvxpy.reductions.complex2real.atom_canonicalizers
+        - cvxpy.reductions.dcp2cone
+        - cvxpy.reductions.dcp2cone.atom_canonicalizers
+        - cvxpy.reductions.eliminate_pwl
+        - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
+        - cvxpy.reductions.qp2quad_form
+        - cvxpy.reductions.qp2quad_form.atom_canonicalizers
+        - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
+        - cvxpy.reductions.solvers
+        - cvxpy.reductions.solvers.conic_solvers
+        - cvxpy.reductions.solvers.qp_solvers
+        - cvxpy.reductions.solvers.lp_solvers
+        - cvxpy.tests
+        - cvxpy.transforms
+        - cvxpy.utilities
         - cvxpy.cvxcore.python
 
 about:
