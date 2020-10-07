@@ -5,9 +5,13 @@ Home: http://www.cvxpy.org/
 
 Package license: Apache-2.0
 
-Feedstock license: BSD-3-Clause
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cvxpy-feedstock/blob/master/LICENSE.txt)
 
 Summary: A Python-embedded modeling language for convex optimization problems
+
+Development: https://github.com/cvxgrp/cvxpy
+
+Documentation: http://www.cvxpy.org/
 
 CVXPY is a Python-embedded modeling language for convex optimization
 problems. It allows you to express your problem in a natural way that
