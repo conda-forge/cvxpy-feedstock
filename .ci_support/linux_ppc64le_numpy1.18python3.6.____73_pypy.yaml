@@ -2,6 +2,8 @@ c_compiler:
 - gcc
 c_compiler_version:
 - '8'
+cdt_name:
+- cos7
 channel_sources:
 - conda-forge,defaults
 channel_targets:
@@ -23,5 +25,7 @@ python:
 target_platform:
 - linux-ppc64le
 zip_keys:
-- - numpy
-  - python
+- - c_compiler_version
+  - cxx_compiler_version
+- - python
+  - numpy
