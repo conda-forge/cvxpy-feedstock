@@ -10,6 +10,7 @@ source:
   sha256: 330eb76e8369c360b68d9231c6eb350848e373b5952134f9bfebaed1a4c4211f
   patches:
     - patches/0001-remove-pyproject.toml.patch
+    - patches/0002-do-not-use-builtins-as-a-dict.patch
 
 build:
   number: 1

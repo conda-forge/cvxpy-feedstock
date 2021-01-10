@@ -1,7 +1,7 @@
-From 8fe0490f0aed16a7cb2907ba33f26c7fa1810d68 Mon Sep 17 00:00:00 2001
+From 4c2ffa56713d610d64c4f3ce653402fa663ea5a7 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 29 Mar 2020 17:50:48 +0200
-Subject: [PATCH] remove pyproject.toml
+Subject: [PATCH 1/2] remove pyproject.toml
 
 ---
  pyproject.toml | 2 --
@@ -18,5 +18,5 @@ index 21722a56..00000000
 -requires = ["numpy >= 1.15", "scipy >= 1.1.0", "setuptools>=40.8.0", "wheel"]
 \ No newline at end of file
 -- 
-2.26.2.windows.1
+2.29.2.windows.3
 
