@@ -46,7 +46,7 @@ outputs:
       requires:
         - nose
       commands:
-        - nosetests cvxpy
+        - nosetests cvxpy -v
 
   - name: cvxpy-base
     build:
