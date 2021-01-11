@@ -1,0 +1,26 @@
+From 2647a1bebaf7c799098ced865916457a2103dbe1 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Mon, 11 Jan 2021 23:54:22 +0100
+Subject: [PATCH 4/4] reduce decimal precision from 7 (default) to 6
+
+In cvxpy.tests.test_dpp.TestDgp.test_sum_matrix
+---
+ cvxpy/tests/test_dpp.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cvxpy/tests/test_dpp.py b/cvxpy/tests/test_dpp.py
+index 7b4a04b3..d1aaefa5 100644
+--- a/cvxpy/tests/test_dpp.py
++++ b/cvxpy/tests/test_dpp.py
+@@ -767,7 +767,7 @@ class TestDgp(BaseTest):
+ 
+         alpha.value = 2.0
+         problem.solve(SOLVER, gp=True, enforce_dpp=True)
+-        np.testing.assert_almost_equal(problem.value, 16)
++        np.testing.assert_almost_equal(problem.value, 16, decimal=6)
+ 
+         w = cp.Variable((2, 2), pos=True)
+         h = cp.Parameter((2, 2), pos=True)
+-- 
+2.29.2.windows.3
+
