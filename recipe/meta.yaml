@@ -2,7 +2,7 @@
 {% set version = "1.1.7" %}
 
 package:
-  name: {{ name|lower }}
+  name: cvxpy-split
   version: {{ version }}
 
 source:
@@ -10,11 +10,13 @@ source:
   sha256: 330eb76e8369c360b68d9231c6eb350848e373b5952134f9bfebaed1a4c4211f
   patches:
     - patches/0001-remove-pyproject.toml.patch
+    - patches/0002-do-not-use-builtins-as-a-dict.patch
+    - patches/0003-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
+    - patches/0004-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
+    - patches/0005-skip-benchmark-tests-on-windows.patch               # [win and py<38]
 
 build:
-  number: 0
-  skip: true  # [py==27 and win]
-  skip: true  # [py==27 and not x86_64]
+  number: 1
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
@@ -45,7 +47,7 @@ outputs:
       requires:
         - nose
       commands:
-        - nosetests cvxpy
+        - nosetests cvxpy -v
 
   - name: cvxpy-base
     build:
@@ -120,3 +122,4 @@ extra:
     - mcg1969
     - scopatz
     - h-vetinari
+  feedstock-name: cvxpy
