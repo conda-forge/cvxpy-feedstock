@@ -13,6 +13,7 @@ source:
     - patches/0002-do-not-use-builtins-as-a-dict.patch
     - patches/0003-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
     - patches/0004-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
+    - patches/0005-skip-benchmark-tests-on-windows.patch               # [win and py<38]
 
 build:
   number: 1
