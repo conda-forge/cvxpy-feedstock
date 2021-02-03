@@ -43,14 +43,16 @@ outputs:
         - ecos >=2
         - scs >=1.1.3
     test:
+      requires:
+        - pytest
+      source_files:
+        - cvxpy/tests
       imports:
         - cvxpy
         - cvxpy.cvxcore
         - cvxpy.cvxcore.python
-      requires:
-        - nose
       commands:
-        - nosetests cvxpy -v
+        - pytest cvxpy/tests -v
 
   - name: cvxpy-base
     build:
