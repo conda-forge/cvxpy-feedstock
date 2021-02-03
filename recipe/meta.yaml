@@ -10,10 +10,9 @@ source:
   sha256: 444068d4eda9ffcd43578895174489d4cef36b28ba7ae8a96ab9ef9571d2b4ff
   patches:
     - patches/0001-remove-pyproject.toml.patch
-    - patches/0002-do-not-use-builtins-as-a-dict.patch
-    - patches/0003-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
-    - patches/0004-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
-    - patches/0005-skip-benchmark-tests-on-windows.patch               # [win and py<38]
+    - patches/0002-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
+    - patches/0003-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
+    - patches/0004-skip-benchmark-tests-on-windows.patch               # [win]
 
 build:
   number: 0
