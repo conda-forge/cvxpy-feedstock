@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.1.10" %}
+{% set version = "1.1.11" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: ecd0a8b89f799cea254928dea8792d9c69c37db0bd830b4cda629b2b2be52270
+  sha256: 5b8aa5cbe834ed0d62609efafed19936404f6bea1abe14c3518450ddc67eb352
   patches:
     - patches/0001-remove-pyproject.toml.patch
     - patches/0002-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
