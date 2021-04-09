@@ -1,4 +1,4 @@
-From 686948e9320df6b92ceeeabf4ea0306cb4102f35 Mon Sep 17 00:00:00 2001
+From fd6341650a26f46a5c03e156e226c96a0423cd0d Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Mon, 11 Jan 2021 23:54:22 +0100
 Subject: [PATCH 3/4] reduce decimal precision from 7 (default) to 6
@@ -9,7 +9,7 @@ In cvxpy.tests.test_dpp.TestDgp.test_sum_matrix
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/cvxpy/tests/test_dpp.py b/cvxpy/tests/test_dpp.py
-index 7b4a04b3..d1aaefa5 100644
+index 5f49c450..ceac4858 100644
 --- a/cvxpy/tests/test_dpp.py
 +++ b/cvxpy/tests/test_dpp.py
 @@ -767,7 +767,7 @@ class TestDgp(BaseTest):

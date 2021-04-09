@@ -1,4 +1,4 @@
-From 9b1ceef1e28ce6189020b6757023f3c3577a7a68 Mon Sep 17 00:00:00 2001
+From f58a03b0d41f1b817f57079864598d9446628c84 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 29 Mar 2020 17:50:48 +0200
 Subject: [PATCH 1/4] remove pyproject.toml
