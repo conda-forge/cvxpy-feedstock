@@ -1,4 +1,4 @@
-From 4f532c616cbc9b8184cb9c0e8f2917cc284189a0 Mon Sep 17 00:00:00 2001
+From f691e2c74d01a66008bd05a8a8e72092c72cd851 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Mon, 11 Jan 2021 23:50:52 +0100
 Subject: [PATCH 2/4] add skip for test_ecos_bb_mi_lp_2
@@ -8,15 +8,15 @@ Subject: [PATCH 2/4] add skip for test_ecos_bb_mi_lp_2
  1 file changed, 1 insertion(+)
 
 diff --git a/cvxpy/tests/test_conic_solvers.py b/cvxpy/tests/test_conic_solvers.py
-index 884bfd08..ed876192 100644
+index c5885e82..ea70e680 100644
 --- a/cvxpy/tests/test_conic_solvers.py
 +++ b/cvxpy/tests/test_conic_solvers.py
-@@ -1380,6 +1380,7 @@ class TestECOS_BB(unittest.TestCase):
-     def test_ecos_bb_mi_lp_0(self):
+@@ -1419,6 +1419,7 @@ class TestECOS_BB(unittest.TestCase):
+     def test_ecos_bb_mi_lp_0(self) -> None:
          StandardTestLPs.test_mi_lp_0(solver='ECOS_BB')
  
 +    @unittest.skip('skipping test on aarch')
-     def test_ecos_bb_mi_lp_2(self):
+     def test_ecos_bb_mi_lp_2(self) -> None:
          StandardTestLPs.test_mi_lp_2(solver='ECOS_BB')
  
 -- 
