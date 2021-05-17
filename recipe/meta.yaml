@@ -118,7 +118,7 @@ about:
     follows the math, rather than in the restrictive standard form required
     by solvers.
   doc_url: http://www.cvxpy.org/
-  dev_url: https://github.com/cvxgrp/cvxpy
+  dev_url: https://github.com/cvxpy/cvxpy
 
 extra:
   recipe-maintainers:
