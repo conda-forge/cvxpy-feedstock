@@ -6,8 +6,8 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: b499ebfae4fc645e9523621573ffcb1c5b6854a1b5c0ce1d66a8a9a458605807
+  url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: f2b6e7f616bd04fe26a86b265cba5207df0cd8a9de66cbb046e0fa0c5635fc16
   patches:
     # debug only: fast-forward from tags/v1.1.12 until 86307f2
     - patches/monster-patch-for-tags-v1.1.12-until-86307f2.patch
