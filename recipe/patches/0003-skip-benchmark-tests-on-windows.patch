@@ -1,0 +1,32 @@
+From 1ca622e5535d0d9634f91a0e7a299126a5dc2e4e Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Tue, 12 Jan 2021 07:29:26 +0100
+Subject: [PATCH 3/3] skip benchmark tests on windows
+
+---
+ cvxpy/tests/test_benchmarks.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/cvxpy/tests/test_benchmarks.py b/cvxpy/tests/test_benchmarks.py
+index 857afac9..02a73a8d 100644
+--- a/cvxpy/tests/test_benchmarks.py
++++ b/cvxpy/tests/test_benchmarks.py
+@@ -5,6 +5,7 @@ import numpy as np
+ 
+ import os
+ import time
++import unittest
+ 
+ 
+ def benchmark(func, iters: int = 1, name=None) -> None:
+@@ -18,6 +19,7 @@ def benchmark(func, iters: int = 1, name=None) -> None:
+         name, np.mean(vals), np.std(vals), iters))
+ 
+ 
++@unittest.skip('skip benchmarks on windows')
+ class TestBenchmarks(BaseTest):
+     def test_diffcp_sdp_example(self) -> None:
+ 
+-- 
+2.31.1.windows.1
+

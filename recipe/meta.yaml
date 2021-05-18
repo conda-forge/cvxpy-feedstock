@@ -10,9 +10,8 @@ source:
   sha256: a9c781e74ad76097b47b86456cb3a943898f7ec9ac8f47bcefc922051cdc4a04
   patches:
     - patches/0001-remove-pyproject.toml.patch
-    - patches/0002-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
-    - patches/0003-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
-    - patches/0004-skip-benchmark-tests-on-windows.patch               # [win]
+    - patches/0002-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
+    - patches/0003-skip-benchmark-tests-on-windows.patch               # [win]
 
 build:
   number: 0
