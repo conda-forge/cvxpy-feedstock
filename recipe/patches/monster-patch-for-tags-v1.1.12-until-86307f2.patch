@@ -1,0 +1,3092 @@
+From 5f9c061fb4b4ad96d23aad0ac6060cd4a93241a2 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Tue, 18 May 2021 23:50:46 +0200
+Subject: [PATCH] monster patch for tags/v1.1.12 until 86307f2
+
+---
+ .github/workflows/build.yml                   | 69 +++++++++++++++++++
+ .github/workflows/python-package.yml          | 39 -----------
+ .travis.yml                                   | 38 ----------
+ README.md                                     |  2 +-
+ .../{Travis => GitHub}/deploy_script.sh       |  8 +--
+ .../GitHub/install_dependencies.sh            | 39 +++++++++++
+ .../{Travis => GitHub}/test_script.sh         | 11 ++-
+ .../Travis/install_dependencies.sh            | 57 ---------------
+ continuous_integration/versiongetter.py       | 21 ++++--
+ cvxpy/atoms/__init__.py                       |  4 +-
+ cvxpy/atoms/affine/add_expr.py                |  3 +-
+ cvxpy/atoms/affine/binary_operators.py        |  7 +-
+ cvxpy/atoms/affine/conv.py                    |  2 +-
+ cvxpy/atoms/affine/cumsum.py                  |  3 +-
+ cvxpy/atoms/affine/diag.py                    |  5 +-
+ cvxpy/atoms/affine/diff.py                    |  2 +-
+ cvxpy/atoms/affine/hstack.py                  |  3 +-
+ cvxpy/atoms/affine/index.py                   |  5 +-
+ cvxpy/atoms/affine/kron.py                    |  3 +-
+ cvxpy/atoms/affine/promote.py                 |  7 +-
+ cvxpy/atoms/affine/reshape.py                 |  2 +-
+ cvxpy/atoms/affine/sum.py                     |  7 +-
+ cvxpy/atoms/affine/trace.py                   |  3 +-
+ cvxpy/atoms/affine/transpose.py               |  3 +-
+ cvxpy/atoms/affine/unary_operators.py         |  3 +-
+ cvxpy/atoms/affine/upper_tri.py               |  4 +-
+ cvxpy/atoms/affine/vstack.py                  | 16 +++--
+ cvxpy/atoms/affine/wraps.py                   |  3 +-
+ cvxpy/atoms/atom.py                           | 13 ++--
+ cvxpy/atoms/elementwise/elementwise.py        |  4 +-
+ cvxpy/atoms/elementwise/logistic.py           |  3 +-
+ cvxpy/atoms/mixed_norm.py                     |  4 +-
+ cvxpy/atoms/norm.py                           |  4 +-
+ cvxpy/atoms/pnorm.py                          |  4 +-
+ cvxpy/atoms/quad_form.py                      |  2 +-
+ cvxpy/constraints/constraint.py               |  6 +-
+ cvxpy/constraints/nonpos.py                   |  8 +--
+ cvxpy/constraints/power.py                    |  2 +-
+ cvxpy/constraints/psd.py                      |  2 +-
+ cvxpy/constraints/utilities.py                |  3 +-
+ cvxpy/constraints/zero.py                     |  6 +-
+ cvxpy/cvxcore/.travis.yml                     | 43 ------------
+ cvxpy/cvxcore/README.md                       |  2 -
+ cvxpy/cvxcore/python/canonInterface.py        |  2 +-
+ cvxpy/cvxcore/python/cvxcore.py               |  4 +-
+ cvxpy/cvxcore/src/LinOpOperations.cpp         |  6 +-
+ cvxpy/expressions/constants/constant.py       |  8 ++-
+ cvxpy/expressions/expression.py               |  4 +-
+ cvxpy/interface/base_matrix_interface.py      | 15 ++--
+ cvxpy/interface/matrix_utilities.py           |  6 +-
+ .../numpy_interface/matrix_interface.py       |  6 +-
+ .../numpy_interface/ndarray_interface.py      |  4 +-
+ .../sparse_matrix_interface.py                |  2 +-
+ cvxpy/lin_ops/lin_op.py                       |  3 +-
+ cvxpy/lin_ops/lin_utils.py                    | 30 ++++----
+ cvxpy/lin_ops/tree_mat.py                     |  6 +-
+ cvxpy/problems/iterative.py                   |  4 +-
+ cvxpy/problems/objective.py                   |  8 +--
+ cvxpy/problems/param_prob.py                  |  2 +-
+ cvxpy/problems/problem.py                     | 20 ++++--
+ cvxpy/reductions/chain.py                     |  2 +-
+ .../atom_canonicalizers/aff_canon.py          |  2 +-
+ cvxpy/reductions/cvx_attr2constr.py           |  2 +-
+ .../dcp2cone/cone_matrix_stuffing.py          |  2 +-
+ .../quad_over_lin_canon.py                    | 12 +++-
+ .../qp2quad_form/qp_matrix_stuffing.py        |  2 +-
+ cvxpy/reductions/solvers/bisection.py         |  4 +-
+ cvxpy/reductions/solvers/compr_matrix.py      |  2 +-
+ .../solvers/conic_solvers/cbc_conif.py        |  2 +-
+ .../solvers/conic_solvers/conic_solver.py     |  5 +-
+ .../solvers/conic_solvers/cplex_conif.py      |  2 +-
+ .../solvers/conic_solvers/cvxopt_conif.py     |  2 +-
+ .../solvers/conic_solvers/diffcp_conif.py     |  2 +-
+ .../solvers/conic_solvers/ecos_bb_conif.py    |  2 +-
+ .../solvers/conic_solvers/ecos_conif.py       |  2 +-
+ .../solvers/conic_solvers/glpk_conif.py       |  2 +-
+ .../solvers/conic_solvers/glpk_mi_conif.py    |  2 +-
+ .../solvers/conic_solvers/gurobi_conif.py     |  2 +-
+ .../solvers/conic_solvers/mosek_conif.py      |  4 +-
+ .../solvers/conic_solvers/nag_conif.py        |  2 +-
+ .../solvers/conic_solvers/scs_conif.py        |  2 +-
+ .../solvers/conic_solvers/xpress_conif.py     |  4 +-
+ cvxpy/reductions/solvers/constant_solver.py   |  6 +-
+ .../reductions/solvers/intermediate_chain.py  |  2 +-
+ .../solvers/qp_solvers/cplex_qpif.py          |  2 +-
+ .../solvers/qp_solvers/gurobi_qpif.py         |  2 +-
+ .../solvers/qp_solvers/osqp_qpif.py           |  2 +-
+ .../solvers/qp_solvers/xpress_qpif.py         |  2 +-
+ cvxpy/reductions/solvers/solver.py            |  4 +-
+ cvxpy/reductions/solvers/solving_chain.py     |  4 +-
+ cvxpy/tests/test_atoms.py                     |  4 ++
+ cvxpy/tests/test_cone2cone.py                 |  4 +-
+ cvxpy/tests/test_conic_solvers.py             |  2 +
+ cvxpy/tests/test_dgp.py                       |  5 ++
+ cvxpy/tests/test_matrices.py                  |  8 ++-
+ cvxpy/tests/test_problem.py                   | 30 +++++++-
+ cvxpy/transforms/indicator.py                 |  2 +-
+ cvxpy/transforms/scalarize.py                 |  4 +-
+ cvxpy/utilities/key_utils.py                  |  8 +--
+ cvxpy/utilities/power_tools.py                |  8 +--
+ cvxpy/utilities/shape.py                      | 11 +--
+ doc/source/contributing/index.rst             | 39 ++++++++++-
+ doc/source/install/index.rst                  | 13 +---
+ doc/sphinxext/docscrape.py                    |  2 +-
+ .../communications/Channel_capacity_BV4.57.py |  4 +-
+ .../optimal_power_Gaussian_channel_BV4.62.py  |  4 +-
+ .../communications/water_filling_BVex5.2.py   | 12 ++--
+ examples/expr_trees/1D_convolution.py         |  2 +-
+ examples/expr_trees/helloworld.py             |  2 +-
+ .../extensions/mixed_integer/admm_problem.py  |  4 +-
+ examples/extensions/mixed_integer/card.py     |  2 +-
+ examples/extensions/mixed_integer/choose.py   |  2 +-
+ examples/extensions/ncvx/boolean.py           |  2 +-
+ examples/extensions/ncvx/branch_and_bound.py  |  2 +-
+ examples/flows/commodity_flow.py              |  2 +-
+ examples/flows/max_flow.py                    |  2 +-
+ examples/fmmc.py                              |  4 +-
+ examples/machine_learning/lasso_regression.py |  2 +-
+ examples/machine_learning/ridge_regression.py |  2 +-
+ examples/relax_and_round.py                   |  2 +-
+ pyproject.toml                                |  8 +--
+ 121 files changed, 478 insertions(+), 412 deletions(-)
+ create mode 100644 .github/workflows/build.yml
+ delete mode 100644 .github/workflows/python-package.yml
+ delete mode 100644 .travis.yml
+ rename continuous_integration/{Travis => GitHub}/deploy_script.sh (79%)
+ create mode 100644 continuous_integration/GitHub/install_dependencies.sh
+ rename continuous_integration/{Travis => GitHub}/test_script.sh (60%)
+ delete mode 100644 continuous_integration/Travis/install_dependencies.sh
+ delete mode 100644 cvxpy/cvxcore/.travis.yml
+
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+new file mode 100644
+index 00000000..b1c5711a
+--- /dev/null
++++ b/.github/workflows/build.yml
+@@ -0,0 +1,69 @@
++name: build
++
++on:
++    pull_request:
++    push:
++        branches:
++            - master
++
++jobs:
++  cleanup-runs:
++    runs-on: ubuntu-latest
++    steps:
++    - uses: rokroskar/workflow-run-cleanup-action@master
++      env:
++        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
++    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/master'"
++  build:
++    runs-on: ${{ matrix.os }}
++    defaults:
++      run:
++        shell: bash -l {0}
++    strategy:
++      fail-fast: false
++      matrix:
++        os: [ ubuntu-18.04, macos-10.15 ]
++        python-version: [ 3.5, 3.6, 3.7, 3.9 ]
++        include:
++          - os: ubuntu-18.04
++            python-version: 3.8
++            openmp: "True"
++          - os: ubuntu-18.04
++            python-version: 3.8
++            openmp: "False"
++            deploy_pypi_source : "True"
++          - os: macos-10.15
++            python-version: 3.8
++            openmp: "False"
++    env:
++      RUNNER_OS: ${{ matrix.os }}
++      PYTHON_VERSION: ${{ matrix.python-version }}
++      COVERAGE: "False"
++      DEPLOY_PYPI_SOURCE: "${{ matrix.deploy_pypi_source == 'True' && 'True' || 'False' }}"
++      USE_OPENMP: "${{ matrix.openmp == 'True' && 'True' || 'False' }}"
++      PYPI_SERVER: ${{ secrets.PYPI_SERVER }}
++      PYPI_USER: ${{ secrets.PYPI_USER }}
++      PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
++      PYPI_API_ENDPOINT: ${{ secrets.PYPI_API_ENDPOINT }}
++
++    steps:
++      - uses: actions/checkout@v2
++      - uses: conda-incubator/setup-miniconda@v2
++        with:
++          auto-update-conda: true
++          python-version: ${{ matrix.python-version }}
++          channels: conda-forge,anaconda
++      - name: install
++        run: |
++          if [ "$RUNNER_OS" = "macOS" ]; then CC=gcc ; fi
++          if [ "$RUNNER_OS" = "macOS" ]; then CXX=g++; fi
++          source continuous_integration/GitHub/install_dependencies.sh
++      - name: test
++        run: |
++          flake8 .
++          bash continuous_integration/GitHub/test_script.sh
++      - name: coverage
++        run: if [[ "$COVERAGE" == "True" ]]; then coveralls; fi
++      - name: deploy
++        if: "startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'"
++        run: bash continuous_integration/GitHub/deploy_script.sh
+diff --git a/.github/workflows/python-package.yml b/.github/workflows/python-package.yml
+deleted file mode 100644
+index b3e2c7c2..00000000
+--- a/.github/workflows/python-package.yml
++++ /dev/null
+@@ -1,39 +0,0 @@
+-# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+-
+-name: Python package
+-
+-on:
+-  push:
+-    branches: [ test ]
+-  pull_request:
+-    branches: [ test ]
+-
+-jobs:
+-  build:
+-
+-    runs-on: ubuntu-latest
+-    strategy:
+-      matrix:
+-        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
+-
+-    steps:
+-    - uses: actions/checkout@v2
+-    - name: Set up Python ${{ matrix.python-version }}
+-      uses: actions/setup-python@v2
+-      with:
+-        python-version: ${{ matrix.python-version }}
+-    - name: Install dependencies
+-      run: |
+-        python -m pip install --upgrade pip
+-        python -m pip install flake8 pytest
+-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+-    - name: Lint with flake8
+-      run: |
+-        # stop the build if there are Python syntax errors or undefined names
+-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+-    - name: Test with pytest
+-      run: |
+-        pytest
+diff --git a/.travis.yml b/.travis.yml
+deleted file mode 100644
+index 87bfdfa8..00000000
+--- a/.travis.yml
++++ /dev/null
+@@ -1,38 +0,0 @@
+-language: C
+-os:
+-  - osx
+-  - linux
+-env:
+-  matrix:
+-    - PYTHON_VERSION="3.7"
+-      COVERAGE="false"
+-      USE_OPENMP="false"
+-      DEPLOY_PYPI_SOURCE="False"
+-    - PYTHON_VERSION="3.8"
+-      COVERAGE="false"
+-      USE_OPENMP="false"
+-      DEPLOY_PYPI_SOURCE="True"
+-    - PYTHON_VERSION="3.9"
+-      COVERAGE="false"
+-      USE_OPENMP="false"
+-      DEPLOY_PYPI_SOURCE="False"
+-    - PYTHON_VERSION="3.8"
+-      COVERAGE="false"
+-      USE_OPENMP="True"
+-      DEPLOY_PYPI_SOURCE="false"
+-matrix:
+-  exclude:
+-    - os: osx
+-      env: PYTHON_VERSION="3.8" COVERAGE="false" USE_OPENMP="True" DEPLOY_PYPI_SOURCE="false"
+-before_install:
+-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then CC=gcc ; fi
+-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then CXX=g++; fi
+-install: source continuous_integration/Travis/install_dependencies.sh
+-script:
+-  - flake8 .
+-  - bash continuous_integration/Travis/test_script.sh
+-after_success:
+-  - if [[ "$COVERAGE" == "true" ]]; then coveralls; fi
+-deploy:
+-  provider: script
+-  script: bash continuous_integration/Travis/deploy_script.sh
+diff --git a/README.md b/README.md
+index c9769ba7..2be25171 100644
+--- a/README.md
++++ b/README.md
+@@ -1,6 +1,6 @@
+ CVXPY
+ =====================
+-[![Build Status](https://travis-ci.org/cvxgrp/cvxpy.png?branch=master)](https://travis-ci.org/cvxgrp/cvxpy)
++[![Build Status](http://github.com/cvxpy/cvxpy/workflows/build/badge.svg?event=push)](https://github.com/cvxpy/cvxpy/actions/workflows/build.yml)
+ [![Build status](https://ci.appveyor.com/api/projects/status/jo7tkvc58c3hgfd7?svg=true)](https://ci.appveyor.com/project/StevenDiamond/cvxpy)
+ 
+ **The CVXPY documentation is at [cvxpy.org](http://www.cvxpy.org/).**
+diff --git a/continuous_integration/Travis/deploy_script.sh b/continuous_integration/GitHub/deploy_script.sh
+similarity index 79%
+rename from continuous_integration/Travis/deploy_script.sh
+rename to continuous_integration/GitHub/deploy_script.sh
+index facef180..b29dfa2b 100644
+--- a/continuous_integration/Travis/deploy_script.sh
++++ b/continuous_integration/GitHub/deploy_script.sh
+@@ -3,16 +3,16 @@
+ source activate testenv
+ conda config --add channels conda-forge
+ conda install --yes requests twine
+-conda install --yes readme_renderer
++pip install readme_renderer
+ 
+ # We chose a somewhat arbitrary build configuration (a specially marked OSX configuration)
+ # to be the designated uploader of source distributions.
+-if [ $DEPLOY_PYPI_SOURCE == "True" ] && [ $TRAVIS_OS_NAME == "osx" ]; then
++if [ $DEPLOY_PYPI_SOURCE == "True" ] && [ $RUNNER_OS == "macOS" ]; then
+     # consider deploying to PyPI
+     cd continuous_integration
+     UPDATE_PYPI_SOURCE=`python -c "import versiongetter as vg; print(vg.update_pypi_source('$PYPI_API_ENDPOINT'))"`
+     cd ..
+-    if [ $UPDATE_PYPI_SOURCE == True ]; then
++    if [ $UPDATE_PYPI_SOURCE == "True" ]; then
+         # assume that local version is ahead of remote version, and update sdist
+         python setup.py sdist
+         twine upload --repository-url $PYPI_SERVER dist/* -u $PYPI_USER -p $PYPI_PASSWORD
+@@ -21,7 +21,7 @@ if [ $DEPLOY_PYPI_SOURCE == "True" ] && [ $TRAVIS_OS_NAME == "osx" ]; then
+ fi
+ 
+ cd continuous_integration
+-UPDATE_PYPI_WHEEL=`python -c "import versiongetter as vg; print(vg.update_pypi_wheel('$PYTHON_VERSION','$TRAVIS_OS_NAME','$PYPI_API_ENDPOINT'))"`
++UPDATE_PYPI_WHEEL=`python -c "import versiongetter as vg; print(vg.update_pypi_wheel('$PYTHON_VERSION','$RUNNER_OS','$PYPI_API_ENDPOINT'))"`
+ cd ..
+ if [ $UPDATE_PYPI_WHEEL == "True" ]; then
+     python setup.py bdist_wheel
+diff --git a/continuous_integration/GitHub/install_dependencies.sh b/continuous_integration/GitHub/install_dependencies.sh
+new file mode 100644
+index 00000000..ab1abf5d
+--- /dev/null
++++ b/continuous_integration/GitHub/install_dependencies.sh
+@@ -0,0 +1,39 @@
++#!/bin/bash
++# This script is meant to be called by the "install" step defined in
++# build.yml. The behavior of the script is controlled by environment 
++# variables defined in the build.yml in .github/workflows/.
++
++set -e
++
++if [[ "$RUNNER_OS" == "Linux" ]]; then
++    sudo apt-get update -qq
++    sudo apt-get install -qq gfortran libgfortran3
++fi
++
++if [[ "$PYTHON_VERSION" == "3.5" ]]; then
++  conda install mkl pip pytest scipy=1.1 numpy=1.15 lapack ecos scs osqp flake8 cvxopt
++elif [[ "$PYTHON_VERSION" == "3.6" ]]; then
++  conda install mkl pip pytest scipy=1.1 numpy=1.15 lapack ecos scs osqp flake8 cvxopt
++elif [[ "$PYTHON_VERSION" == "3.7" ]]; then
++  conda install mkl pip pytest scipy=1.1 numpy=1.15 lapack ecos scs osqp flake8 cvxopt
++elif [[ "$PYTHON_VERSION" == "3.8" ]]; then
++  # There is a config that works with numpy 1.14, but not 1.15!
++  # So we fix things at 1.16.
++  # Assuming we use numpy 1.16, the earliest version of scipy we can use is 1.3.
++  conda install mkl pip pytest scipy=1.3 numpy=1.16 lapack ecos scs osqp flake8 cvxopt
++elif [[ "$PYTHON_VERSION" == "3.9" ]]; then
++  # The earliest version of numpy that works is 1.19.
++  # Given numpy 1.19, the earliest version of scipy we can use is 1.5.
++  conda install mkl pip pytest scipy=1.5 numpy=1.19 lapack ecos scs flake8 cvxopt
++  python -m pip install osqp
++fi
++
++if [[ "$USE_OPENMP" == "True" ]]; then
++    conda install -c conda-forge openmp
++fi
++
++python -m pip install diffcp
++
++if [[ "$COVERAGE" == "True" ]]; then
++    python -m pip install coverage coveralls
++fi
+diff --git a/continuous_integration/Travis/test_script.sh b/continuous_integration/GitHub/test_script.sh
+similarity index 60%
+rename from continuous_integration/Travis/test_script.sh
+rename to continuous_integration/GitHub/test_script.sh
+index e76fdcd7..ab675f21 100644
+--- a/continuous_integration/Travis/test_script.sh
++++ b/continuous_integration/GitHub/test_script.sh
+@@ -1,8 +1,7 @@
+ #!/bin/bash
+-# This script is meant to be called by the "script" step defined in
+-# .travis.yml. See http://docs.travis-ci.com/ for more details.
+-# The behavior of the script is controlled by environment variables defined
+-# in the .travis.yml in the top level folder of the project.
++# This script is meant to be called by the "test" step defined in
++# build.yml. The behavior of the script is controlled by environment
++# variables defined in the build.yml in .github/workflows/.
+ 
+ set -e
+ 
+@@ -10,7 +9,7 @@ python --version
+ python -c "import numpy; print('numpy %s' % numpy.__version__)"
+ python -c "import scipy; print('scipy %s' % scipy.__version__)"
+ 
+-if [ $USE_OPENMP == "True" ] && [ $TRAVIS_OS_NAME == "linux" ]; then
++if [ $USE_OPENMP == "True" ] && [ $RUNNER_OS == "Linux" ]; then
+     CFLAGS="-fopenmp" LDFLAGS="-lgomp" python setup.py install
+     export OMP_NUM_THREADS=4
+ else
+@@ -20,7 +19,7 @@ fi
+ python -c "import cvxpy; print(cvxpy.installed_solvers())"
+ python $(dirname ${BASH_SOURCE[0]})/../osqp_version.py
+ 
+-if [[ "$COVERAGE" == "true" ]]; then
++if [[ "$COVERAGE" == "True" ]]; then
+     export WITH_COVERAGE="--with-coverage"
+ else
+     export WITH_COVERAGE=""
+diff --git a/continuous_integration/Travis/install_dependencies.sh b/continuous_integration/Travis/install_dependencies.sh
+deleted file mode 100644
+index 15c49442..00000000
+--- a/continuous_integration/Travis/install_dependencies.sh
++++ /dev/null
+@@ -1,57 +0,0 @@
+-#!/bin/bash
+-# This script is meant to be called by the "install" step defined in
+-# .travis.yml. See http://docs.travis-ci.com/ for more details.
+-# The behavior of the script is controlled by environment variables defined
+-# in the .travis.yml in the top level folder of the project.
+-
+-set -e
+-
+-if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+-    sudo apt-get update -qq
+-    sudo apt-get install -qq gfortran libgfortran3
+-    # LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libgfortran.so.3
+-    wget http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+-       -O miniconda.sh
+-    chmod +x miniconda.sh && ./miniconda.sh -b
+-    export PATH=/home/travis/miniconda3/bin:$PATH
+-elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+-    wget http://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh \
+-         -O miniconda.sh
+-    chmod +x miniconda.sh && ./miniconda.sh -b
+-    export PATH=/Users/travis/miniconda3/bin:$PATH
+-fi
+-
+-conda update --yes conda
+-conda config --add channels anaconda
+-conda config --add channels conda-forge
+-# ^ Adding conda-forge second has the effect of giving it higher priority.
+-
+-if [[ "$PYTHON_VERSION" == "3.7" ]]; then
+-  conda create -n testenv --yes python=3.7 mkl pip pytest \
+-   scipy=1.1 numpy=1.15 lapack ecos scs osqp flake8 cvxopt
+-  source activate testenv
+-elif [[ "$PYTHON_VERSION" == "3.8" ]]; then
+-  # There is a config that works with numpy 1.14, but not 1.15!
+-  # So we fix things at 1.16.
+-  # Assuming we use numpy 1.16, the earliest version of scipy we can use is 1.3.
+-  conda create -n testenv --yes python=3.8 mkl pip pytest \
+-   scipy=1.3 numpy=1.16 lapack ecos scs osqp flake8 cvxopt
+-  source activate testenv
+-elif [[ "$PYTHON_VERSION" == "3.9" ]]; then
+-  # The earliest version of numpy that works is 1.19.
+-  # Given numpy 1.19, the earliest version of scipy we can use is 1.5.
+-  conda create -n testenv --yes python=3.9 mkl pip pytest \
+-   scipy=1.5 numpy=1.19 lapack ecos scs flake8 cvxopt
+-  source activate testenv
+-  pip install osqp
+-fi
+-
+-if [[ "$USE_OPENMP" == "true" ]]; then
+-    conda install -c conda-forge openmp
+-fi
+-
+-pip install diffcp
+-
+-if [[ "$COVERAGE" == "true" ]]; then
+-    pip install coverage coveralls
+-fi
+diff --git a/continuous_integration/versiongetter.py b/continuous_integration/versiongetter.py
+index 48c993ac..04e05b5c 100644
+--- a/continuous_integration/versiongetter.py
++++ b/continuous_integration/versiongetter.py
+@@ -2,7 +2,7 @@ import requests
+ from pkg_resources import parse_version
+ 
+ 
+-def update_pypi_source(server):
++def update_pypi_source(server: str) -> bool:
+     # Gets the latest version on PyPi accompanied by a source distribution
+     url = server + '/cvxpy/json'
+     r = requests.get(url)
+@@ -22,14 +22,26 @@ def update_pypi_source(server):
+         raise RuntimeError(msg)
+ 
+ 
+-def update_pypi_wheel(python_version, operating_system, server):
++def map_runner_os_name_to_os(runner_os_name: str) -> str:
++    if runner_os_name.lower() == 'linux':
++        operating_system = 'linux'
++    elif runner_os_name.lower() in {'osx', 'macos'}:
++        operating_system = 'osx'
++    elif runner_os_name.lower() == 'win':
++        operating_system = 'win'
++    else:
++        raise Exception('Unknown runner_os: ' + runner_os_name)
++    return operating_system
++
++
++def update_pypi_wheel(python_version: str, runner_os_name: str, server: str) -> bool:
+     # python_version is expected to be
+     #
+     #   '2.7', '3.5', '3.6', '3.7', ... etc..
+     #
+-    # operating system is expected to be
++    # runner_os_name is expected to be
+     #
+-    #   'win' or 'osx' or 'linux'
++    #   'win' or 'osx' or 'macOS' or 'linux' or 'Linux'
+     #
+     # server is expected to be
+     #
+@@ -51,6 +63,7 @@ def update_pypi_wheel(python_version, operating_system, server):
+     r = requests.get(url)
+     major_minor = python_version.split('.')
+     py_ver = 'cp' + major_minor[0] + major_minor[1]
++    operating_system = map_runner_os_name_to_os(runner_os_name)
+     if 'linux' in operating_system:
+         return False
+     if r.ok:
+diff --git a/cvxpy/atoms/__init__.py b/cvxpy/atoms/__init__.py
+index 4ddb9e19..e18fcac2 100644
+--- a/cvxpy/atoms/__init__.py
++++ b/cvxpy/atoms/__init__.py
+@@ -103,6 +103,7 @@ SOC_ATOMS = [
+     QuadForm,
+     quad_over_lin,
+     power,
++    huber,
+ ]
+ 
+ EXP_ATOMS = [
+@@ -127,5 +128,6 @@ PSD_ATOMS = [
+ 
+ NONPOS_ATOMS = [
+     norm1,
+-    abs
++    abs,
++    huber,
+ ]
+diff --git a/cvxpy/atoms/affine/add_expr.py b/cvxpy/atoms/affine/add_expr.py
+index e83f6d1f..40af7db8 100644
+--- a/cvxpy/atoms/affine/add_expr.py
++++ b/cvxpy/atoms/affine/add_expr.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ import sys
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+@@ -101,7 +102,7 @@ class AddExpression(AffAtom):
+         copy.__init__(args)
+         return copy
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Sum the linear expressions.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/binary_operators.py b/cvxpy/atoms/affine/binary_operators.py
+index 57fb1665..52bf3388 100644
+--- a/cvxpy/atoms/affine/binary_operators.py
++++ b/cvxpy/atoms/affine/binary_operators.py
+@@ -15,6 +15,7 @@ limitations under the License.
+ """
+ 
+ from __future__ import division
++from typing import Tuple
+ import sys
+ 
+ import cvxpy.interface as intf
+@@ -197,7 +198,7 @@ class MulExpression(BinaryOperator):
+ 
+         return [DX, DY]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Multiply the linear expressions.
+ 
+         Parameters
+@@ -283,7 +284,7 @@ class multiply(MulExpression):
+         return (self.args[0].is_psd() and self.args[1].is_nsd()) or \
+                (self.args[0].is_nsd() and self.args[1].is_psd())
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Multiply the expressions elementwise.
+ 
+         Parameters
+@@ -385,7 +386,7 @@ class DivExpression(BinaryOperator):
+         else:
+             return self.args[0].is_nonneg()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Multiply the linear expressions.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/conv.py b/cvxpy/atoms/affine/conv.py
+index 21348401..94a3019a 100644
+--- a/cvxpy/atoms/affine/conv.py
++++ b/cvxpy/atoms/affine/conv.py
+@@ -85,7 +85,7 @@ class conv(AffAtom):
+         """
+         return self.args[0].is_nonpos()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Convolve two vectors.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/cumsum.py b/cvxpy/atoms/affine/cumsum.py
+index 15ca00f1..4e7c72fd 100644
+--- a/cvxpy/atoms/affine/cumsum.py
++++ b/cvxpy/atoms/affine/cumsum.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.axis_atom import AxisAtom
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+@@ -112,7 +113,7 @@ class cumsum(AffAtom, AxisAtom):
+         """
+         return [self.axis]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Cumulative sum via difference matrix.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/diag.py b/cvxpy/atoms/affine/diag.py
+index a2198c92..f62b2bf1 100644
+--- a/cvxpy/atoms/affine/diag.py
++++ b/cvxpy/atoms/affine/diag.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ from cvxpy.atoms.affine.vec import vec
+@@ -92,7 +93,7 @@ class diag_vec(AffAtom):
+         """
+         return self.is_nonpos()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Convolve two vectors.
+ 
+         Parameters
+@@ -147,7 +148,7 @@ class diag_mat(AffAtom):
+         """
+         return self.args[0].is_nonneg() or self.args[0].is_psd()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Extracts the diagonal of a matrix.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/diff.py b/cvxpy/atoms/affine/diff.py
+index c5213a63..21427955 100644
+--- a/cvxpy/atoms/affine/diff.py
++++ b/cvxpy/atoms/affine/diff.py
+@@ -17,7 +17,7 @@ limitations under the License.
+ from cvxpy.expressions.expression import Expression
+ 
+ 
+-def diff(x, k=1, axis=0):
++def diff(x, k: int = 1, axis: int = 0):
+     """Vector of kth order differences.
+ 
+     Takes in a vector of length n and returns a vector
+diff --git a/cvxpy/atoms/affine/hstack.py b/cvxpy/atoms/affine/hstack.py
+index c53f54ea..8481b457 100644
+--- a/cvxpy/atoms/affine/hstack.py
++++ b/cvxpy/atoms/affine/hstack.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ import cvxpy.lin_ops.lin_utils as lu
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+@@ -67,7 +68,7 @@ class Hstack(AffAtom):
+                     if i != 1 and arg.shape[i] != model[i]:
+                         raise error
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Stack the expressions horizontally.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/index.py b/cvxpy/atoms/affine/index.py
+index b73b2b74..80f86ffb 100644
+--- a/cvxpy/atoms/affine/index.py
++++ b/cvxpy/atoms/affine/index.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ from cvxpy.atoms.affine.vec import vec
+@@ -79,7 +80,7 @@ class index(AffAtom):
+         """
+         return [self.key, self._orig_key]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Index/slice into the expression.
+ 
+         Parameters
+@@ -167,7 +168,7 @@ class special_index(AffAtom):
+           identity[select_vec] @ vec(self.args[0]), self._shape)
+         return lowered.grad
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Index/slice into the expression.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/kron.py b/cvxpy/atoms/affine/kron.py
+index ce7f76c0..f0ce4ca1 100644
+--- a/cvxpy/atoms/affine/kron.py
++++ b/cvxpy/atoms/affine/kron.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ import cvxpy.utilities as u
+@@ -65,7 +66,7 @@ class kron(AffAtom):
+         """
+         return self.args[0].is_nonpos()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Kronecker product of two matrices.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/promote.py b/cvxpy/atoms/affine/promote.py
+index 19d23d60..65cf3cea 100644
+--- a/cvxpy/atoms/affine/promote.py
++++ b/cvxpy/atoms/affine/promote.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ from cvxpy.expressions.expression import Expression
+@@ -20,7 +21,7 @@ import cvxpy.lin_ops.lin_utils as lu
+ import numpy as np
+ 
+ 
+-def promote(expr, shape):
++def promote(expr, shape: Tuple[int, ...]):
+     """ Promote a scalar expression to a vector/matrix.
+ 
+     Parameters
+@@ -56,7 +57,7 @@ class Promote(AffAtom):
+         The shape to promote to.
+     """
+ 
+-    def __init__(self, expr, shape) -> None:
++    def __init__(self, expr, shape: Tuple[int, ...]) -> None:
+         self.promoted_shape = shape
+         super(Promote, self).__init__(expr)
+ 
+@@ -89,7 +90,7 @@ class Promote(AffAtom):
+         """
+         return [self.promoted_shape]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Promote scalar to vector/matrix
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/reshape.py b/cvxpy/atoms/affine/reshape.py
+index 90dec8ac..948cbac7 100644
+--- a/cvxpy/atoms/affine/reshape.py
++++ b/cvxpy/atoms/affine/reshape.py
+@@ -87,7 +87,7 @@ class reshape(AffAtom):
+         """
+         return [self._shape, self.order]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Reshape
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/sum.py b/cvxpy/atoms/affine/sum.py
+index f485eed2..8e99212c 100644
+--- a/cvxpy/atoms/affine/sum.py
++++ b/cvxpy/atoms/affine/sum.py
+@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from functools import wraps
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ from cvxpy.atoms.axis_atom import AxisAtom
+ import cvxpy.lin_ops.lin_utils as lu
+ import cvxpy.interface as intf
+ import numpy as np
+-from functools import wraps
+ 
+ 
+ class Sum(AxisAtom, AffAtom):
+@@ -59,7 +60,7 @@ class Sum(AxisAtom, AffAtom):
+             result = np.sum(values[0], axis=self.axis, keepdims=self.keepdims)
+         return result
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Sum the linear expression's entries.
+ 
+         Parameters
+@@ -99,7 +100,7 @@ class Sum(AxisAtom, AffAtom):
+ 
+ 
+ @wraps(Sum)
+-def sum(expr, axis=None, keepdims=False):
++def sum(expr, axis=None, keepdims: bool = False):
+     """Wrapper for Sum class.
+     """
+     if isinstance(expr, list):
+diff --git a/cvxpy/atoms/affine/trace.py b/cvxpy/atoms/affine/trace.py
+index 0a6d5907..5b7253ed 100644
+--- a/cvxpy/atoms/affine/trace.py
++++ b/cvxpy/atoms/affine/trace.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ import cvxpy.lin_ops.lin_utils as lu
+@@ -59,7 +60,7 @@ class trace(AffAtom):
+         """
+         return False
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Sum the diagonal entries of the linear expression.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/transpose.py b/cvxpy/atoms/affine/transpose.py
+index 889b6755..cd9294db 100644
+--- a/cvxpy/atoms/affine/transpose.py
++++ b/cvxpy/atoms/affine/transpose.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ import cvxpy.lin_ops.lin_utils as lu
+@@ -66,7 +67,7 @@ class transpose(AffAtom):
+         """
+         return [self.axes]
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Create a new variable equal to the argument transposed.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/unary_operators.py b/cvxpy/atoms/affine/unary_operators.py
+index 3ed9659e..f739e810 100644
+--- a/cvxpy/atoms/affine/unary_operators.py
++++ b/cvxpy/atoms/affine/unary_operators.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ import cvxpy.lin_ops.lin_utils as lu
+@@ -71,7 +72,7 @@ class NegExpression(UnaryOperator):
+         """
+         return self.args[0].is_hermitian()
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Negate the affine objective.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/upper_tri.py b/cvxpy/atoms/affine/upper_tri.py
+index 0b3f3db6..645e10f1 100644
+--- a/cvxpy/atoms/affine/upper_tri.py
++++ b/cvxpy/atoms/affine/upper_tri.py
+@@ -79,7 +79,7 @@ class upper_tri(AffAtom):
+         """
+         return True
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Vectorized strictly upper triagonal entries.
+ 
+         Parameters
+@@ -99,7 +99,7 @@ class upper_tri(AffAtom):
+         return (lu.upper_tri(arg_objs[0]), [])
+ 
+ 
+-def vec_to_upper_tri(expr, strict=False):
++def vec_to_upper_tri(expr, strict: bool = False):
+     expr = Expression.cast_to_const(expr)
+     ell = expr.shape[0]
+     if strict:
+diff --git a/cvxpy/atoms/affine/vstack.py b/cvxpy/atoms/affine/vstack.py
+index ebd77ee0..aa027d0f 100644
+--- a/cvxpy/atoms/affine/vstack.py
++++ b/cvxpy/atoms/affine/vstack.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ import cvxpy.lin_ops.lin_utils as lu
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+@@ -56,14 +57,21 @@ class Vstack(AffAtom):
+     # All arguments must have the same width.
+     def validate_arguments(self) -> None:
+         model = self.args[0].shape
++        # Promote scalars.
++        if model == ():
++            model = (1,)
+         for arg in self.args[1:]:
+-            if len(arg.shape) != len(model) or \
+-               (len(model) > 1 and model[1:] != arg.shape[1:]) or \
+-               (len(model) <= 1 and model != arg.shape):
++            arg_shape = arg.shape
++            # Promote scalars.
++            if arg_shape == ():
++                arg_shape = (1,)
++            if len(arg_shape) != len(model) or \
++               (len(model) > 1 and model[1:] != arg_shape[1:]) or \
++               (len(model) <= 1 and model != arg_shape):
+                 raise ValueError(("All the input dimensions except"
+                                   " for axis 0 must match exactly."))
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Stack the expressions vertically.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/affine/wraps.py b/cvxpy/atoms/affine/wraps.py
+index 730a04b1..8bef0b44 100644
+--- a/cvxpy/atoms/affine/wraps.py
++++ b/cvxpy/atoms/affine/wraps.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ from cvxpy.atoms.affine.affine_atom import AffAtom
+ 
+@@ -39,7 +40,7 @@ class Wrap(AffAtom):
+         """
+         return self.args[0].shape
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Stack the expressions horizontally.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/atom.py b/cvxpy/atoms/atom.py
+index ece8e7a8..88f8a059 100644
+--- a/cvxpy/atoms/atom.py
++++ b/cvxpy/atoms/atom.py
+@@ -13,19 +13,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++import abc
++from typing import List, Tuple
+ 
+-
+-from cvxpy import utilities as u
+ from cvxpy import interface as intf
++from cvxpy import utilities as u
+ from cvxpy.expressions import cvxtypes
+ from cvxpy.expressions.constants import Constant
+ from cvxpy.expressions.expression import Expression
+-import cvxpy.lin_ops.lin_utils as lu
+-from cvxpy.utilities.deterministic import unique_list
+ from cvxpy.utilities import performance_utils as perf
+-from typing import List
++from cvxpy.utilities.deterministic import unique_list
++import cvxpy.lin_ops.lin_utils as lu
+ 
+-import abc
+ import numpy as np
+ 
+ 
+@@ -324,7 +323,7 @@ class Atom(Expression):
+                                                                 data)
+             return graph_obj, constraints + graph_constr
+ 
+-    def graph_implementation(self, arg_objs, shape, data=None):
++    def graph_implementation(self, arg_objs, shape: Tuple[int, ...], data=None):
+         """Reduces the atom to an affine expression and list of constraints.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/elementwise/elementwise.py b/cvxpy/atoms/elementwise/elementwise.py
+index b748980f..ff52e82d 100644
+--- a/cvxpy/atoms/elementwise/elementwise.py
++++ b/cvxpy/atoms/elementwise/elementwise.py
+@@ -15,6 +15,8 @@ limitations under the License.
+ """
+ 
+ import abc
++from typing import Tuple
++
+ from cvxpy.atoms.atom import Atom
+ import cvxpy.utilities as u
+ import cvxpy.lin_ops.lin_utils as lu
+@@ -60,7 +62,7 @@ class Elementwise(Atom):
+         return sp.dia_matrix((value, [0]), shape=(rows, cols)).tocsc()
+ 
+     @staticmethod
+-    def _promote(arg, shape):
++    def _promote(arg, shape: Tuple[int, ...]):
+         """Promotes the lin op if necessary.
+ 
+         Parameters
+diff --git a/cvxpy/atoms/elementwise/logistic.py b/cvxpy/atoms/elementwise/logistic.py
+index 5e24a335..0b84c1e8 100644
+--- a/cvxpy/atoms/elementwise/logistic.py
++++ b/cvxpy/atoms/elementwise/logistic.py
+@@ -75,6 +75,5 @@ class logistic(Elementwise):
+         """
+         rows = self.args[0].size
+         cols = self.size
+-        exp_val = np.exp(values[0])
+-        grad_vals = exp_val/(1 + exp_val)
++        grad_vals = np.exp(values[0] - np.logaddexp(0, values[0]))
+         return [logistic.elemwise_grad_to_diag(grad_vals, rows, cols)]
+diff --git a/cvxpy/atoms/mixed_norm.py b/cvxpy/atoms/mixed_norm.py
+index 588025bc..6777fab6 100644
+--- a/cvxpy/atoms/mixed_norm.py
++++ b/cvxpy/atoms/mixed_norm.py
+@@ -14,11 +14,13 @@ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+ 
++from typing import Union
++
+ from cvxpy.expressions.expression import Expression
+ from cvxpy.atoms.norm import norm
+ 
+ 
+-def mixed_norm(X, p=2, q=1):
++def mixed_norm(X, p: Union[int, str] = 2, q: Union[int, str] = 1):
+     """Lp,q norm; :math:`(\\sum_k (\\sum_l \\lvert x_{k,l} \\rvert^p)^{q/p})^{1/q}`.
+ 
+     Parameters
+diff --git a/cvxpy/atoms/norm.py b/cvxpy/atoms/norm.py
+index 4e3d793c..26ab4da6 100644
+--- a/cvxpy/atoms/norm.py
++++ b/cvxpy/atoms/norm.py
+@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+ 
++from typing import Union
++
+ import numpy as np
+ import cvxpy
+ from cvxpy.expressions.expression import Expression
+@@ -25,7 +27,7 @@ from cvxpy.atoms.norm_inf import norm_inf
+ from cvxpy.atoms.affine.vec import vec
+ 
+ 
+-def norm(x, p=2, axis=None):
++def norm(x, p: Union[int, str] = 2, axis=None):
+     """Wrapper on the different norm atoms.
+ 
+     Parameters
+diff --git a/cvxpy/atoms/pnorm.py b/cvxpy/atoms/pnorm.py
+index 9590b42d..6bd6026b 100644
+--- a/cvxpy/atoms/pnorm.py
++++ b/cvxpy/atoms/pnorm.py
+@@ -20,10 +20,10 @@ from cvxpy.atoms.norm_inf import norm_inf
+ import numpy as np
+ import scipy.sparse as sp
+ from cvxpy.utilities.power_tools import pow_high, pow_mid, pow_neg
+-from typing import Tuple
++from typing import Tuple, Union
+ 
+ 
+-def pnorm(x, p=2, axis=None, keepdims=False, max_denom=1024):
++def pnorm(x, p: Union[int, str] = 2, axis=None, keepdims: bool = False, max_denom: int = 1024):
+     """Factory function for a mathematical p-norm.
+ 
+     Parameters
+diff --git a/cvxpy/atoms/quad_form.py b/cvxpy/atoms/quad_form.py
+index c4621abb..2bed88ba 100644
+--- a/cvxpy/atoms/quad_form.py
++++ b/cvxpy/atoms/quad_form.py
+@@ -154,7 +154,7 @@ class SymbolicQuadForm(Atom):
+         return True
+ 
+ 
+-def decomp_quad(P, cond=None, rcond=None, lower=True, check_finite=True):
++def decomp_quad(P, cond=None, rcond=None, lower=True, check_finite: bool = True):
+     """
+     Compute a matrix decomposition.
+ 
+diff --git a/cvxpy/constraints/constraint.py b/cvxpy/constraints/constraint.py
+index 52acaad9..cebb6c83 100644
+--- a/cvxpy/constraints/constraint.py
++++ b/cvxpy/constraints/constraint.py
+@@ -89,7 +89,7 @@ class Constraint(u.Canonical):
+         return any(arg.is_complex() for arg in self.args)
+ 
+     @abc.abstractmethod
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """Checks whether the constraint is DCP.
+ 
+         Returns
+@@ -100,7 +100,7 @@ class Constraint(u.Canonical):
+         raise NotImplementedError()
+ 
+     @abc.abstractmethod
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         """Checks whether the constraint is DGP.
+ 
+         Returns
+@@ -161,7 +161,7 @@ class Constraint(u.Canonical):
+                              "whose expression is None-valued.")
+         return residual
+ 
+-    def value(self, tolerance=1e-8):
++    def value(self, tolerance: float = 1e-8):
+         """Checks whether the constraint violation is less than a tolerance.
+ 
+         Parameters
+diff --git a/cvxpy/constraints/nonpos.py b/cvxpy/constraints/nonpos.py
+index bd8e582a..424a65a5 100644
+--- a/cvxpy/constraints/nonpos.py
++++ b/cvxpy/constraints/nonpos.py
+@@ -44,7 +44,7 @@ class NonPos(Constraint):
+     def name(self) -> str:
+         return "%s <= 0" % self.args[0]
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A non-positive constraint is DCP if its argument is convex."""
+         if dpp:
+             with scopes.dpp_scope():
+@@ -103,7 +103,7 @@ class NonNeg(Constraint):
+     def name(self) -> str:
+         return "0 <= %s" % self.args[0]
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A non-negative constraint is DCP if its argument is concave."""
+         if dpp:
+             with scopes.dpp_scope():
+@@ -176,14 +176,14 @@ class Inequality(Constraint):
+         """int : The size of the constrained expression."""
+         return self.expr.size
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A non-positive constraint is DCP if its argument is convex."""
+         if dpp:
+             with scopes.dpp_scope():
+                 return self.expr.is_convex()
+         return self.expr.is_convex()
+ 
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         if dpp:
+             with scopes.dpp_scope():
+                 return (self.args[0].is_log_log_convex() and
+diff --git a/cvxpy/constraints/power.py b/cvxpy/constraints/power.py
+index 5f7541e8..7ddb2edd 100644
+--- a/cvxpy/constraints/power.py
++++ b/cvxpy/constraints/power.py
+@@ -228,7 +228,7 @@ class PowConeND(Constraint):
+         cone_size = 1 + self.args[0].shape[self.axis]
+         return [cone_size] * self.num_cones()
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A power cone constraint is DCP if each argument is affine.
+         """
+         if dpp:
+diff --git a/cvxpy/constraints/psd.py b/cvxpy/constraints/psd.py
+index dee2c953..4192300a 100644
+--- a/cvxpy/constraints/psd.py
++++ b/cvxpy/constraints/psd.py
+@@ -57,7 +57,7 @@ class PSD(Constraint):
+     def name(self) -> str:
+         return "%s >> 0" % self.args[0]
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A PSD constraint is DCP if the constrained expression is affine.
+         """
+         if dpp:
+diff --git a/cvxpy/constraints/utilities.py b/cvxpy/constraints/utilities.py
+index d69134c2..2e54f764 100644
+--- a/cvxpy/constraints/utilities.py
++++ b/cvxpy/constraints/utilities.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ # Utility functions for constraints.
+ 
+@@ -93,7 +94,7 @@ def format_elemwise(vars_):
+     return [lu.create_geq(lu.sum_expr(terms))]
+ 
+ 
+-def get_spacing_matrix(shape, spacing, offset):
++def get_spacing_matrix(shape: Tuple[int, ...], spacing, offset):
+     """Returns a sparse matrix LinOp that spaces out an expression.
+ 
+     Parameters
+diff --git a/cvxpy/constraints/zero.py b/cvxpy/constraints/zero.py
+index 18c2cf37..a7bc677b 100644
+--- a/cvxpy/constraints/zero.py
++++ b/cvxpy/constraints/zero.py
+@@ -54,7 +54,7 @@ class Zero(Constraint):
+     def name(self) -> str:
+         return "%s == 0" % self.args[0]
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """A zero constraint is DCP if its argument is affine."""
+         if dpp:
+             with scopes.dpp_scope():
+@@ -133,14 +133,14 @@ class Equality(Constraint):
+     def name(self) -> str:
+         return "%s == %s" % (self.args[0], self.args[1])
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """An equality constraint is DCP if its argument is affine."""
+         if dpp:
+             with scopes.dpp_scope():
+                 return self.expr.is_affine()
+         return self.expr.is_affine()
+ 
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         if dpp:
+             with scopes.dpp_scope():
+                 return (self.args[0].is_log_log_affine() and
+diff --git a/cvxpy/cvxcore/.travis.yml b/cvxpy/cvxcore/.travis.yml
+deleted file mode 100644
+index 6639b6b0..00000000
+--- a/cvxpy/cvxcore/.travis.yml
++++ /dev/null
+@@ -1,43 +0,0 @@
+-language: python
+-python:
+-  - "2.7"
+-  - "3.4"
+-os:
+-  - linux
+-
+-before_install:
+-  # conda-based environment instead
+-  - deactivate
+-
+-  # use miniconda installer
+-  - wget http://repo.continuum.io/miniconda/Miniconda-3.9.1-Linux-x86_64.sh -O miniconda.sh
+-  - chmod +x miniconda.sh && ./miniconda.sh -b
+-  - export PATH=/home/travis/miniconda/bin:$PATH
+-  - conda update --yes conda
+-
+-  # install deps
+-  - deps="nomkl pip numpy scipy"
+-  - conda create -p $HOME/py --yes $deps "python=$TRAVIS_PYTHON_VERSION"
+-  - export PATH=$HOME/py/bin:$PATH
+-
+-  # cvxpy dependency
+-  - sudo apt-get install -qq libatlas-base-dev gfortran
+-  - export ATLAS="/usr/lib/atlas-base/libatlas.so"
+-
+-# command to install dependencies
+-install:
+-  # compiling library
+-  - python setup.py install
+-
+-  # adding cvxpy
+-  - cd tests
+-  - git clone https://github.com/cvxgrp/cvxpy.git
+-  - cd cvxpy
+-  - python setup.py install
+-  - pip install nose
+-
+-# command to run tests
+-script:  nosetests cvxpy
+-
+-notifications:
+-  email: false
+diff --git a/cvxpy/cvxcore/README.md b/cvxpy/cvxcore/README.md
+index 0a7fe73b..a756efa5 100644
+--- a/cvxpy/cvxcore/README.md
++++ b/cvxpy/cvxcore/README.md
+@@ -1,5 +1,3 @@
+-[![Build Status](https://travis-ci.org/cvxgrp/cvxcore.svg?branch=master)](https://travis-ci.org/cvxgrp/cvxcore)
+-
+ # cvxcore
+ 
+ ## Introduction
+diff --git a/cvxpy/cvxcore/python/canonInterface.py b/cvxpy/cvxcore/python/canonInterface.py
+index 4a2d4459..6cf3ef5e 100644
+--- a/cvxpy/cvxcore/python/canonInterface.py
++++ b/cvxpy/cvxcore/python/canonInterface.py
+@@ -58,7 +58,7 @@ def get_parameter_vector(param_size,
+     return param_vec
+ 
+ 
+-def reduce_problem_data_tensor(A, var_length, quad_form=False):
++def reduce_problem_data_tensor(A, var_length, quad_form: bool = False):
+     """Reduce a problem data tensor, for efficient construction of the problem data
+ 
+     If quad_form=False, the problem data tensor A is a matrix of shape (m, p), where p is the
+diff --git a/cvxpy/cvxcore/python/cvxcore.py b/cvxpy/cvxcore/python/cvxcore.py
+index 216c2ae7..4d6e417d 100644
+--- a/cvxpy/cvxcore/python/cvxcore.py
++++ b/cvxpy/cvxcore/python/cvxcore.py
+@@ -72,10 +72,10 @@ class SwigPyIterator:
+     def value(self):
+         return _cvxcore.SwigPyIterator_value(self)
+ 
+-    def incr(self, n=1):
++    def incr(self, n: int = 1):
+         return _cvxcore.SwigPyIterator_incr(self, n)
+ 
+-    def decr(self, n=1):
++    def decr(self, n: int = 1):
+         return _cvxcore.SwigPyIterator_decr(self, n)
+ 
+     def distance(self, x):
+diff --git a/cvxpy/cvxcore/src/LinOpOperations.cpp b/cvxpy/cvxcore/src/LinOpOperations.cpp
+index 395f3dcc..e854d9f5 100644
+--- a/cvxpy/cvxcore/src/LinOpOperations.cpp
++++ b/cvxpy/cvxcore/src/LinOpOperations.cpp
+@@ -726,16 +726,12 @@ Tensor get_rmul_mat(const LinOp &lin, int arg_idx) {
+                       : 1;
+ 
+   // Interpret as row or column vector as needed.
+-  int arg_cols;
+   int result_rows;
+   if (lin.get_args()[0]->get_shape().size() == 0) {
+-    arg_cols = 1;
+     result_rows = 1;
+   } else if (lin.get_args()[0]->get_shape().size() == 1) {
+-    arg_cols = lin.get_args()[0]->get_shape()[0];
+     result_rows = 1;
+   } else {
+-    arg_cols = lin.get_args()[0]->get_shape()[1];
+     result_rows = lin.get_args()[0]->get_shape()[0];
+   }
+   int n = (lin.get_shape().size() > 0) ? result_rows : 1;
+@@ -834,7 +830,7 @@ Tensor get_mul_mat(const LinOp &lin, int arg_idx) {
+     // vectorized views.
+     data_flattened = data_rows == 1 || data_cols == 1;
+     Matrix coeffs = get_constant_data(*data, false);
+-    mul_ten = build_tensor(coeffs); 
++    mul_ten = build_tensor(coeffs);
+   } else {
+     mul_ten = lin_to_tensor(*data);
+   }
+diff --git a/cvxpy/expressions/constants/constant.py b/cvxpy/expressions/constants/constant.py
+index c3930ddc..e90eedd8 100644
+--- a/cvxpy/expressions/constants/constant.py
++++ b/cvxpy/expressions/constants/constant.py
+@@ -19,6 +19,7 @@ import cvxpy.lin_ops.lin_utils as lu
+ import cvxpy.interface as intf
+ from cvxpy.settings import EIGVAL_TOL
+ from cvxpy.utilities import performance_utils as perf
++import scipy.sparse as sp
+ from scipy.sparse.linalg import eigsh
+ from scipy.sparse.linalg.eigen.arpack.arpack import ArpackError
+ import numpy as np
+@@ -77,7 +78,12 @@ class Constant(Leaf):
+         """Returns whether the constant is elementwise positive.
+         """
+         if self._cached_is_pos is None:
+-            self._cached_is_pos = np.all(self._value > 0)
++            if sp.issparse(self._value):
++                # sparse constants cannot be elementwise positive,
++                # since they (typically) have many entries which are zero.
++                self._cached_is_pos = False
++            else:
++                self._cached_is_pos = np.all(self._value > 0)
+         return self._cached_is_pos
+ 
+     @property
+diff --git a/cvxpy/expressions/expression.py b/cvxpy/expressions/expression.py
+index b3274e48..a60c7932 100644
+--- a/cvxpy/expressions/expression.py
++++ b/cvxpy/expressions/expression.py
+@@ -192,7 +192,7 @@ class Expression(u.Canonical):
+         raise NotImplementedError()
+ 
+     @perf.compute_once
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """Checks whether the Expression is DCP.
+ 
+         Parameters
+@@ -241,7 +241,7 @@ class Expression(u.Canonical):
+         """
+         raise NotImplementedError()
+ 
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         """Checks whether the Expression is log-log DCP.
+ 
+         Returns
+diff --git a/cvxpy/interface/base_matrix_interface.py b/cvxpy/interface/base_matrix_interface.py
+index c4eafbb0..663d6e37 100644
+--- a/cvxpy/interface/base_matrix_interface.py
++++ b/cvxpy/interface/base_matrix_interface.py
+@@ -13,9 +13,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++import abc
++from typing import Tuple
+ 
+ import cvxpy.interface.matrix_utilities
+-import abc
+ import numpy as np
+ 
+ 
+@@ -27,7 +28,7 @@ class BaseMatrixInterface:
+     __metaclass__ = abc.ABCMeta
+ 
+     @abc.abstractmethod
+-    def const_to_matrix(self, value, convert_scalars=False):
++    def const_to_matrix(self, value, convert_scalars: bool = False):
+         """Convert an arbitrary value into a matrix of type self.target_matrix.
+ 
+         Args:
+@@ -42,7 +43,7 @@ class BaseMatrixInterface:
+     # Adds a case for scalars to const_to_matrix methods.
+     @staticmethod
+     def scalar_const(converter):
+-        def new_converter(self, value, convert_scalars=False):
++        def new_converter(self, value, convert_scalars: bool = False):
+             if not convert_scalars and cvxpy.interface.matrix_utilities.is_scalar(value):
+                 return cvxpy.interface.matrix_utilities.scalar_value(value)
+             else:
+@@ -69,16 +70,16 @@ class BaseMatrixInterface:
+         raise NotImplementedError()
+ 
+     # Return a matrix with all 0's.
+-    def zeros(self, shape):
++    def zeros(self, shape: Tuple[int, ...]):
+         return self.scalar_matrix(0, shape)
+ 
+     # Return a matrix with all 1's.
+-    def ones(self, shape):
++    def ones(self, shape: Tuple[int, ...]):
+         return self.scalar_matrix(1, shape)
+ 
+     # A matrix with all entries equal to the given scalar value.
+     @abc.abstractmethod
+-    def scalar_matrix(self, value, shape):
++    def scalar_matrix(self, value, shape: Tuple[int, ...]):
+         raise NotImplementedError()
+ 
+     # Return the value at the given index in the matrix.
+@@ -92,7 +93,7 @@ class BaseMatrixInterface:
+ 
+     # Coerce the matrix into the given shape.
+     @abc.abstractmethod
+-    def reshape(self, matrix, shape):
++    def reshape(self, matrix, shape: Tuple[int, ...]):
+         raise NotImplementedError()
+ 
+     def block_add(self, matrix, block, vert_offset, horiz_offset, rows, cols,
+diff --git a/cvxpy/interface/matrix_utilities.py b/cvxpy/interface/matrix_utilities.py
+index 39bc6ecb..943532d8 100644
+--- a/cvxpy/interface/matrix_utilities.py
++++ b/cvxpy/interface/matrix_utilities.py
+@@ -165,7 +165,7 @@ def from_1D_to_2D(constant):
+         return constant
+ 
+ 
+-def convert(constant, sparse=False, convert_scalars=False):
++def convert(constant, sparse: bool = False, convert_scalars: bool = False):
+     """Convert to appropriate type.
+     """
+     if isinstance(constant, (list, np.matrix)):
+@@ -222,7 +222,7 @@ def sign(constant):
+     return (min_val >= 0, max_val <= 0)
+ 
+ 
+-def is_complex(constant, tol=1e-5) -> bool:
++def is_complex(constant, tol: float = 1e-5) -> bool:
+     """Return (is real, is imaginary).
+ 
+     Parameters
+@@ -287,7 +287,7 @@ def is_hermitian(constant) -> bool:
+     return is_symm, is_herm
+ 
+ 
+-def is_sparse_symmetric(m, complex=False) -> bool:
++def is_sparse_symmetric(m, complex: bool = False) -> bool:
+     """Check if a sparse matrix is symmetric
+ 
+     Parameters
+diff --git a/cvxpy/interface/numpy_interface/matrix_interface.py b/cvxpy/interface/numpy_interface/matrix_interface.py
+index 43387154..49eb4c78 100644
+--- a/cvxpy/interface/numpy_interface/matrix_interface.py
++++ b/cvxpy/interface/numpy_interface/matrix_interface.py
+@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+-
++from typing import Tuple
+ 
+ from cvxpy.interface.numpy_interface.ndarray_interface import NDArrayInterface
+ import scipy.sparse as sp
+@@ -27,7 +27,7 @@ class MatrixInterface(NDArrayInterface):
+     TARGET_MATRIX = np.matrix
+ 
+     @NDArrayInterface.scalar_const
+-    def const_to_matrix(self, value, convert_scalars=False):
++    def const_to_matrix(self, value, convert_scalars: bool = False):
+         """Convert an arbitrary value into a matrix of type self.target_matrix.
+ 
+         Args:
+@@ -51,7 +51,7 @@ class MatrixInterface(NDArrayInterface):
+         return np.asmatrix(np.eye(size))
+ 
+     # A matrix with all entries equal to the given scalar value.
+-    def scalar_matrix(self, value, shape):
++    def scalar_matrix(self, value, shape: Tuple[int, ...]):
+         mat = np.zeros(shape, dtype='float64') + value
+         return np.asmatrix(mat)
+ 
+diff --git a/cvxpy/interface/numpy_interface/ndarray_interface.py b/cvxpy/interface/numpy_interface/ndarray_interface.py
+index 141bd5cc..ccbf45c3 100644
+--- a/cvxpy/interface/numpy_interface/ndarray_interface.py
++++ b/cvxpy/interface/numpy_interface/ndarray_interface.py
+@@ -28,7 +28,7 @@ class NDArrayInterface(base.BaseMatrixInterface):
+     """
+     TARGET_MATRIX = numpy.ndarray
+ 
+-    def const_to_matrix(self, value, convert_scalars=False):
++    def const_to_matrix(self, value, convert_scalars: bool = False):
+         """Convert an arbitrary value into a matrix of type self.target_matrix.
+ 
+         Args:
+@@ -69,7 +69,7 @@ class NDArrayInterface(base.BaseMatrixInterface):
+         return matrix.item()
+ 
+     # A matrix with all entries equal to the given scalar value.
+-    def scalar_matrix(self, value, shape):
++    def scalar_matrix(self, value, shape: Tuple[int, ...]):
+         return numpy.zeros(shape, dtype='float64') + value
+ 
+     def reshape(self, matrix, size):
+diff --git a/cvxpy/interface/numpy_interface/sparse_matrix_interface.py b/cvxpy/interface/numpy_interface/sparse_matrix_interface.py
+index 62f11c7f..71f3d5f0 100644
+--- a/cvxpy/interface/numpy_interface/sparse_matrix_interface.py
++++ b/cvxpy/interface/numpy_interface/sparse_matrix_interface.py
+@@ -26,7 +26,7 @@ class SparseMatrixInterface(NDArrayInterface):
+     TARGET_MATRIX = sp.csc_matrix
+ 
+     @NDArrayInterface.scalar_const
+-    def const_to_matrix(self, value, convert_scalars=False):
++    def const_to_matrix(self, value, convert_scalars: bool = False):
+         """Convert an arbitrary value into a matrix of type self.target_matrix.
+ 
+         Args:
+diff --git a/cvxpy/lin_ops/lin_op.py b/cvxpy/lin_ops/lin_op.py
+index b268f49e..4903a0a5 100644
+--- a/cvxpy/lin_ops/lin_op.py
++++ b/cvxpy/lin_ops/lin_op.py
+@@ -16,12 +16,13 @@ limitations under the License.
+ THIS FILE IS DEPRECATED AND MAY BE REMOVED WITHOUT WARNING!
+ DO NOT CALL THESE FUNCTIONS IN YOUR CODE!
+ """
++from typing import Tuple
+ 
+ 
+ # A linear operator applied to a variable
+ # or a constant or function of parameters.
+ class LinOp:
+-    def __init__(self, type, shape, args, data) -> None:
++    def __init__(self, type, shape: Tuple[int, ...], args, data) -> None:
+         self.type = type
+         self.shape = shape
+         self.args = args
+diff --git a/cvxpy/lin_ops/lin_utils.py b/cvxpy/lin_ops/lin_utils.py
+index 77604c51..648a0e01 100644
+--- a/cvxpy/lin_ops/lin_utils.py
++++ b/cvxpy/lin_ops/lin_utils.py
+@@ -16,8 +16,10 @@ limitations under the License.
+ THIS FILE IS DEPRECATED AND MAY BE REMOVED WITHOUT WARNING!
+ DO NOT CALL THESE FUNCTIONS IN YOUR CODE!
+ """
+-import cvxpy.lin_ops.lin_op as lo
++from typing import Tuple
++
+ from cvxpy.lin_ops.lin_constraints import LinEqConstr, LinLeqConstr
++import cvxpy.lin_ops.lin_op as lo
+ import cvxpy.utilities as u
+ import numpy as np
+ 
+@@ -53,7 +55,7 @@ def get_id() -> int:
+     return new_id
+ 
+ 
+-def create_var(shape, var_id=None):
++def create_var(shape: Tuple[int, ...], var_id=None):
+     """Creates a new internal variable.
+ 
+     Parameters
+@@ -73,7 +75,7 @@ def create_var(shape, var_id=None):
+     return lo.LinOp(lo.VARIABLE, shape, [], var_id)
+ 
+ 
+-def create_param(shape, param_id=None):
++def create_param(shape: Tuple[int, ...], param_id=None):
+     """Wraps a parameter.
+ 
+     Parameters
+@@ -93,7 +95,7 @@ def create_param(shape, param_id=None):
+     return lo.LinOp(lo.PARAM, shape, [], param_id)
+ 
+ 
+-def create_const(value, shape, sparse=False):
++def create_const(value, shape: Tuple[int, ...], sparse: bool = False):
+     """Wraps a constant.
+ 
+     Parameters
+@@ -234,7 +236,7 @@ def promote_lin_ops_for_mul(lh_op, rh_op):
+     return lh_op, rh_op, shape
+ 
+ 
+-def mul_expr(lh_op, rh_op, shape):
++def mul_expr(lh_op, rh_op, shape: Tuple[int, ...]):
+     """Multiply two linear operators, with the constant on the left.
+ 
+     Parameters
+@@ -252,7 +254,7 @@ def mul_expr(lh_op, rh_op, shape):
+     return lo.LinOp(lo.MUL, shape, [rh_op], lh_op)
+ 
+ 
+-def rmul_expr(lh_op, rh_op, shape):
++def rmul_expr(lh_op, rh_op, shape: Tuple[int, ...]):
+     """Multiply two linear operators, with the constant on the right.
+ 
+     Parameters
+@@ -290,7 +292,7 @@ def multiply(lh_op, rh_op):
+     return lo.LinOp(lo.MUL_ELEM, lh_op.shape, [rh_op], lh_op)
+ 
+ 
+-def kron(lh_op, rh_op, shape):
++def kron(lh_op, rh_op, shape: Tuple[int, ...]):
+     """Kronecker product of two matrices.
+ 
+     Parameters
+@@ -330,7 +332,7 @@ def div_expr(lh_op, rh_op):
+     return lo.LinOp(lo.DIV, lh_op.shape, [lh_op], rh_op)
+ 
+ 
+-def promote(operator, shape):
++def promote(operator, shape: Tuple[int, ...]):
+     """Promotes a scalar operator to the given shape.
+ 
+     Parameters
+@@ -348,7 +350,7 @@ def promote(operator, shape):
+     return lo.LinOp(lo.PROMOTE, shape, [operator], None)
+ 
+ 
+-def sum_entries(operator, shape):
++def sum_entries(operator, shape: Tuple[int, ...]):
+     """Sum the entries of an operator.
+ 
+     Parameters
+@@ -382,7 +384,7 @@ def trace(operator):
+     return lo.LinOp(lo.TRACE, (1, 1), [operator], None)
+ 
+ 
+-def index(operator, shape, keys):
++def index(operator, shape: Tuple[int, ...], keys):
+     """Indexes/slices an operator.
+ 
+     Parameters
+@@ -402,7 +404,7 @@ def index(operator, shape, keys):
+     return lo.LinOp(lo.INDEX, shape, [operator], keys)
+ 
+ 
+-def conv(lh_op, rh_op, shape):
++def conv(lh_op, rh_op, shape: Tuple[int, ...]):
+     """1D discrete convolution of two vectors.
+ 
+     Parameters
+@@ -444,7 +446,7 @@ def transpose(operator):
+         return lo.LinOp(lo.TRANSPOSE, shape, [operator], None)
+ 
+ 
+-def reshape(operator, shape):
++def reshape(operator, shape: Tuple[int, ...]):
+     """Reshapes an operator.
+ 
+     Parameters
+@@ -514,7 +516,7 @@ def upper_tri(operator):
+     return lo.LinOp(lo.UPPER_TRI, shape, [operator], None)
+ 
+ 
+-def hstack(operators, shape):
++def hstack(operators, shape: Tuple[int, ...]):
+     """Concatenates operators horizontally.
+ 
+     Parameters
+@@ -532,7 +534,7 @@ def hstack(operators, shape):
+     return lo.LinOp(lo.HSTACK, shape, operators, None)
+ 
+ 
+-def vstack(operators, shape):
++def vstack(operators, shape: Tuple[int, ...]):
+     """Concatenates operators vertically.
+ 
+     Parameters
+diff --git a/cvxpy/lin_ops/tree_mat.py b/cvxpy/lin_ops/tree_mat.py
+index 8b4db94d..a7b34b33 100644
+--- a/cvxpy/lin_ops/tree_mat.py
++++ b/cvxpy/lin_ops/tree_mat.py
+@@ -26,7 +26,7 @@ from scipy.signal import fftconvolve
+ # and multiplying by it and it's transpose.
+ 
+ 
+-def mul(lin_op, val_dict, is_abs=False):
++def mul(lin_op, val_dict, is_abs: bool = False):
+     """Multiply the expression tree by a vector.
+ 
+     Parameters
+@@ -67,7 +67,7 @@ def mul(lin_op, val_dict, is_abs=False):
+             return op_mul(lin_op, eval_args)
+ 
+ 
+-def tmul(lin_op, value, is_abs=False):
++def tmul(lin_op, value, is_abs: bool = False):
+     """Multiply the transpose of the expression tree by a vector.
+ 
+     Parameters
+@@ -297,7 +297,7 @@ def op_abs_tmul(lin_op, value):
+     return result
+ 
+ 
+-def conv_mul(lin_op, rh_val, transpose=False, is_abs=False):
++def conv_mul(lin_op, rh_val, transpose: bool = False, is_abs: bool = False):
+     """Multiply by a convolution operator.
+ 
+     arameters
+diff --git a/cvxpy/problems/iterative.py b/cvxpy/problems/iterative.py
+index 5df76ddc..7fb54a54 100644
+--- a/cvxpy/problems/iterative.py
++++ b/cvxpy/problems/iterative.py
+@@ -26,14 +26,14 @@ import numpy as np
+ 
+ def get_mul_funcs(sym_data):
+ 
+-    def accAmul(x, y, is_abs=False):
++    def accAmul(x, y, is_abs: bool = False):
+         # y += A*x
+         rows = y.shape[0]
+         var_dict = vec_to_dict(x, sym_data.var_offsets,
+                                sym_data.var_sizes)
+         y += constr_mul(sym_data.constraints, var_dict, rows, is_abs)
+ 
+-    def accATmul(x, y, is_abs=False):
++    def accATmul(x, y, is_abs: bool = False):
+         # y += A.T*x
+         terms = constr_unpack(sym_data.constraints, x)
+         val_dict = constr_tmul(sym_data.constraints, terms, is_abs)
+diff --git a/cvxpy/problems/objective.py b/cvxpy/problems/objective.py
+index 728bf4ba..ca77f9c2 100644
+--- a/cvxpy/problems/objective.py
++++ b/cvxpy/problems/objective.py
+@@ -142,7 +142,7 @@ class Minimize(Objective):
+         """
+         return self.args[0].canonical_form
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """The objective must be convex.
+         """
+         if dpp:
+@@ -150,7 +150,7 @@ class Minimize(Objective):
+                 return self.args[0].is_convex()
+         return self.args[0].is_convex()
+ 
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         """The objective must be log-log convex.
+         """
+         if dpp:
+@@ -213,7 +213,7 @@ class Maximize(Objective):
+         obj, constraints = self.args[0].canonical_form
+         return (lu.neg_expr(obj), constraints)
+ 
+-    def is_dcp(self, dpp=False) -> bool:
++    def is_dcp(self, dpp: bool = False) -> bool:
+         """The objective must be concave.
+         """
+         if dpp:
+@@ -221,7 +221,7 @@ class Maximize(Objective):
+                 return self.args[0].is_concave()
+         return self.args[0].is_concave()
+ 
+-    def is_dgp(self, dpp=False) -> bool:
++    def is_dgp(self, dpp: bool = False) -> bool:
+         """The objective must be log-log concave.
+         """
+         if dpp:
+diff --git a/cvxpy/problems/param_prob.py b/cvxpy/problems/param_prob.py
+index f7fbef0f..b19236d1 100644
+--- a/cvxpy/problems/param_prob.py
++++ b/cvxpy/problems/param_prob.py
+@@ -30,7 +30,7 @@ class ParamProb:
+         raise NotImplementedError()
+ 
+     @abc.abstractproperty
+-    def apply_parameters(self, id_to_param_value=None, zero_offset=False,
++    def apply_parameters(self, id_to_param_value=None, zero_offset: bool = False,
+                          keep_zeros=False):
+         """Returns A, b after applying parameters (and reshaping).
+ 
+diff --git a/cvxpy/problems/problem.py b/cvxpy/problems/problem.py
+index 4ad91b0f..eeb651be 100644
+--- a/cvxpy/problems/problem.py
++++ b/cvxpy/problems/problem.py
+@@ -472,7 +472,9 @@ class Problem(u.Canonical):
+         """
+         cls.REGISTERED_SOLVE_METHODS[name] = func
+ 
+-    def get_problem_data(self, solver, gp=False, enforce_dpp=False, verbose=False):
++    def get_problem_data(
++        self, solver, gp: bool = False, enforce_dpp: bool = False, verbose: bool = False
++    ):
+         """Returns the problem data used in the call to the solver.
+ 
+         When a problem is solved, CVXPY creates a chain of reductions enclosed
+@@ -633,7 +635,7 @@ class Problem(u.Canonical):
+ 
+     def _find_candidate_solvers(self,
+                                 solver=None,
+-                                gp=False):
++                                gp: bool = False):
+         """
+         Find candidate solvers for the current problem. If solver
+         is not None, it checks if the specified solver is compatible
+@@ -762,7 +764,7 @@ class Problem(u.Canonical):
+                 candidates['conic_solvers'] = [custom_solver.name()]
+         return candidates
+ 
+-    def _construct_chain(self, solver=None, gp=False, enforce_dpp=False):
++    def _construct_chain(self, solver=None, gp: bool = False, enforce_dpp: bool = False):
+         """
+         Construct the chains required to reformulate and solve the problem.
+ 
+@@ -820,10 +822,14 @@ class Problem(u.Canonical):
+         self._inverse_data = None
+ 
+     def _solve(self,
+-               solver=None,
+-               warm_start=True,
+-               verbose=False,
+-               gp=False, qcp=False, requires_grad=False, enforce_dpp=False, **kwargs):
++               solver: str = None,
++               warm_start: bool = True,
++               verbose: bool = False,
++               gp: bool = False,
++               qcp: bool = False,
++               requires_grad: bool = False,
++               enforce_dpp: bool = False,
++               **kwargs):
+         """Solves a DCP compliant optimization problem.
+ 
+         Saves the values of primal and dual variables in the variable
+diff --git a/cvxpy/reductions/chain.py b/cvxpy/reductions/chain.py
+index 3391668f..2f6adc35 100644
+--- a/cvxpy/reductions/chain.py
++++ b/cvxpy/reductions/chain.py
+@@ -51,7 +51,7 @@ class Chain(Reduction):
+             problem, _ = r.apply(problem)
+         return True
+ 
+-    def apply(self, problem, verbose=False):
++    def apply(self, problem, verbose: bool = False):
+         """Applies the chain to a problem and returns an equivalent problem.
+ 
+         Parameters
+diff --git a/cvxpy/reductions/complex2real/atom_canonicalizers/aff_canon.py b/cvxpy/reductions/complex2real/atom_canonicalizers/aff_canon.py
+index 2f732a9f..2dc94834 100644
+--- a/cvxpy/reductions/complex2real/atom_canonicalizers/aff_canon.py
++++ b/cvxpy/reductions/complex2real/atom_canonicalizers/aff_canon.py
+@@ -69,7 +69,7 @@ def join(expr, lh_arg, rh_arg):
+         return expr.copy([lh_arg, rh_arg])
+ 
+ 
+-def add(lh_arg, rh_arg, neg=False):
++def add(lh_arg, rh_arg, neg: bool = False):
+     """Helper function to sum arguments.
+        Negates rh_arg if neg is True.
+     """
+diff --git a/cvxpy/reductions/cvx_attr2constr.py b/cvxpy/reductions/cvx_attr2constr.py
+index d8ab951b..9991fabc 100644
+--- a/cvxpy/reductions/cvx_attr2constr.py
++++ b/cvxpy/reductions/cvx_attr2constr.py
+@@ -59,7 +59,7 @@ def attributes_present(variables, attr_map):
+                                              in variables)]
+ 
+ 
+-def recover_value_for_variable(variable, lowered_value, project=True):
++def recover_value_for_variable(variable, lowered_value, project: bool = True):
+     if variable.attributes['diag']:
+         return sp.diags(lowered_value.flatten())
+     elif attributes_present([variable], SYMMETRIC_ATTRIBUTES):
+diff --git a/cvxpy/reductions/dcp2cone/cone_matrix_stuffing.py b/cvxpy/reductions/dcp2cone/cone_matrix_stuffing.py
+index b788da57..bbad3f40 100644
+--- a/cvxpy/reductions/dcp2cone/cone_matrix_stuffing.py
++++ b/cvxpy/reductions/dcp2cone/cone_matrix_stuffing.py
+@@ -159,7 +159,7 @@ class ParamConeProg(ParamProb):
+         return self.x.attributes['boolean'] or \
+             self.x.attributes['integer']
+ 
+-    def apply_parameters(self, id_to_param_value=None, zero_offset=False,
++    def apply_parameters(self, id_to_param_value=None, zero_offset: bool = False,
+                          keep_zeros=False):
+         """Returns A, b after applying parameters (and reshaping).
+ 
+diff --git a/cvxpy/reductions/qp2quad_form/atom_canonicalizers/quad_over_lin_canon.py b/cvxpy/reductions/qp2quad_form/atom_canonicalizers/quad_over_lin_canon.py
+index 44eed3b5..946fbaa6 100644
+--- a/cvxpy/reductions/qp2quad_form/atom_canonicalizers/quad_over_lin_canon.py
++++ b/cvxpy/reductions/qp2quad_form/atom_canonicalizers/quad_over_lin_canon.py
+@@ -22,8 +22,16 @@ from scipy.sparse import eye
+ def quad_over_lin_canon(expr, args):
+     affine_expr = args[0]
+     y = args[1]
++    # Simplify if y has no parameters.
++    if len(y.parameters()) == 0:
++        quad_mat = eye(affine_expr.size)/y.value
++    else:
++        # TODO this codepath produces an intermediate dense matrix.
++        # but it should be sparse the whole time.
++        quad_mat = eye(affine_expr.size)/y
++
+     if isinstance(affine_expr, Variable):
+-        return SymbolicQuadForm(affine_expr, eye(affine_expr.size)/y, expr), []
++        return SymbolicQuadForm(affine_expr, quad_mat, expr), []
+     else:
+         t = Variable(affine_expr.shape)
+-        return SymbolicQuadForm(t, eye(affine_expr.size)/y, expr), [affine_expr == t]
++        return SymbolicQuadForm(t, quad_mat, expr), [affine_expr == t]
+diff --git a/cvxpy/reductions/qp2quad_form/qp_matrix_stuffing.py b/cvxpy/reductions/qp2quad_form/qp_matrix_stuffing.py
+index e52cf346..3ad79f64 100644
+--- a/cvxpy/reductions/qp2quad_form/qp_matrix_stuffing.py
++++ b/cvxpy/reductions/qp2quad_form/qp_matrix_stuffing.py
+@@ -156,7 +156,7 @@ class ParamQuadProg(ParamProb):
+         return self.x.attributes['boolean'] or \
+             self.x.attributes['integer']
+ 
+-    def apply_parameters(self, id_to_param_value=None, zero_offset=False,
++    def apply_parameters(self, id_to_param_value=None, zero_offset: bool = False,
+                          keep_zeros=False):
+         """Returns A, b after applying parameters (and reshaping).
+ 
+diff --git a/cvxpy/reductions/solvers/bisection.py b/cvxpy/reductions/solvers/bisection.py
+index 50555171..77c6e58e 100644
+--- a/cvxpy/reductions/solvers/bisection.py
++++ b/cvxpy/reductions/solvers/bisection.py
+@@ -138,8 +138,8 @@ def _bisect(problem, solver, t, low, high, tighten_lower, tighten_higher,
+     raise error.SolverError("Max iters hit during bisection.")
+ 
+ 
+-def bisect(problem, solver=None, low=None, high=None, eps=1e-6, verbose=False,
+-           max_iters=100, max_iters_interval_search=100):
++def bisect(problem, solver=None, low=None, high=None, eps: float = 1e-6, verbose: bool = False,
++           max_iters: int = 100, max_iters_interval_search: int = 100):
+     """Bisection on a one-parameter family of DCP problems.
+ 
+     Bisects on a one-parameter family of DCP problems emitted by `Dqcp2Dcp`.
+diff --git a/cvxpy/reductions/solvers/compr_matrix.py b/cvxpy/reductions/solvers/compr_matrix.py
+index 4ec80679..380e9707 100644
+--- a/cvxpy/reductions/solvers/compr_matrix.py
++++ b/cvxpy/reductions/solvers/compr_matrix.py
+@@ -26,7 +26,7 @@ def get_row_nnz(mat, row):
+     return mat.indptr[row+1] - mat.indptr[row]
+ 
+ 
+-def compress_matrix(A, b, equil_eps=1e-10):
++def compress_matrix(A, b, equil_eps: float = 1e-10):
+     """Compresses A and b by eliminating redundant rows.
+ 
+     Identifies rows that are multiples of another row.
+diff --git a/cvxpy/reductions/solvers/conic_solvers/cbc_conif.py b/cvxpy/reductions/solvers/conic_solvers/cbc_conif.py
+index 57638e4f..4538ae8a 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/cbc_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/cbc_conif.py
+@@ -100,7 +100,7 @@ class CBC(SCS):
+         else:
+             return failure_solution(status)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         # Import basic modelling tools of cylp
+         from cylp.cy import CyClpSimplex
+         from cylp.py.modeling.CyLPModel import CyLPModel, CyLPArray
+diff --git a/cvxpy/reductions/solvers/conic_solvers/conic_solver.py b/cvxpy/reductions/solvers/conic_solvers/conic_solver.py
+index 28f889e5..20f2def5 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/conic_solver.py
++++ b/cvxpy/reductions/solvers/conic_solvers/conic_solver.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import Tuple
+ 
+ import cvxpy.settings as s
+ from cvxpy.constraints import SOC, ExpCone, PSD, Zero, NonNeg, PowCone3D
+@@ -32,7 +33,7 @@ import scipy.sparse as sp
+ 
+ class LinearOperator:
+     """A wrapper for linear operators."""
+-    def __init__(self, linear_op, shape) -> None:
++    def __init__(self, linear_op, shape: Tuple[int, ...]) -> None:
+         if sp.issparse(linear_op):
+             self._matmul = lambda X: linear_op @ X
+         else:
+@@ -91,7 +92,7 @@ class ConicSolver(Solver):
+                         problem.constraints))
+ 
+     @staticmethod
+-    def get_spacing_matrix(shape, spacing, streak, num_blocks, offset):
++    def get_spacing_matrix(shape: Tuple[int, ...], spacing, streak, num_blocks, offset):
+         """Returns a sparse matrix that spaces out an expression.
+ 
+         Parameters
+diff --git a/cvxpy/reductions/solvers/conic_solvers/cplex_conif.py b/cvxpy/reductions/solvers/conic_solvers/cplex_conif.py
+index e0ae6a2a..96aaea31 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/cplex_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/cplex_conif.py
+@@ -286,7 +286,7 @@ class CPLEX(SCS):
+         else:
+             return failure_solution(status)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import cplex
+ 
+         c = data[s.C]
+diff --git a/cvxpy/reductions/solvers/conic_solvers/cvxopt_conif.py b/cvxpy/reductions/solvers/conic_solvers/cvxopt_conif.py
+index 63299e4e..8387cfaf 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/cvxopt_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/cvxopt_conif.py
+@@ -152,7 +152,7 @@ class CVXOPT(ECOS):
+         else:
+             return failure_solution(status)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import cvxopt.solvers
+         # Save original cvxopt solver options.
+         old_options = cvxopt.solvers.options.copy()
+diff --git a/cvxpy/reductions/solvers/conic_solvers/diffcp_conif.py b/cvxpy/reductions/solvers/conic_solvers/diffcp_conif.py
+index 528afc4a..f660a5d7 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/diffcp_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/diffcp_conif.py
+@@ -52,7 +52,7 @@ class DIFFCP(scs_conif.SCS):
+         data[s.B] = b
+         return data, inv_data
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts,
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts,
+                        solver_cache=None):
+         """Returns the result of the call to the solver.
+ 
+diff --git a/cvxpy/reductions/solvers/conic_solvers/ecos_bb_conif.py b/cvxpy/reductions/solvers/conic_solvers/ecos_bb_conif.py
+index 13d34989..2845eb3f 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/ecos_bb_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/ecos_bb_conif.py
+@@ -105,7 +105,7 @@ class ECOS_BB(ECOS):
+         else:
+             return failure_solution(status, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import ecos
+         cones = dims_to_solver_dict(data[ConicSolver.DIMS])
+         # Default verbose to false for BB wrapper.
+diff --git a/cvxpy/reductions/solvers/conic_solvers/ecos_conif.py b/cvxpy/reductions/solvers/conic_solvers/ecos_conif.py
+index 0a8fea0e..dfb2d9ab 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/ecos_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/ecos_conif.py
+@@ -126,7 +126,7 @@ class ECOS(ConicSolver):
+             data[s.H] = None
+         return data, inv_data
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import ecos
+         cones = dims_to_solver_dict(data[ConicSolver.DIMS])
+         if data[s.A] is not None and data[s.A].nnz == 0 and np.prod(data[s.A].shape) > 0:
+diff --git a/cvxpy/reductions/solvers/conic_solvers/glpk_conif.py b/cvxpy/reductions/solvers/conic_solvers/glpk_conif.py
+index 01995af1..ff2b566f 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/glpk_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/glpk_conif.py
+@@ -86,7 +86,7 @@ class GLPK(CVXOPT):
+         else:
+             return failure_solution(status)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import cvxopt.solvers
+         # Save original cvxopt solver options.
+         old_options = cvxopt.solvers.options.copy()
+diff --git a/cvxpy/reductions/solvers/conic_solvers/glpk_mi_conif.py b/cvxpy/reductions/solvers/conic_solvers/glpk_mi_conif.py
+index 4e14df64..9acc7057 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/glpk_mi_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/glpk_mi_conif.py
+@@ -48,7 +48,7 @@ class GLPK_MI(GLPK):
+         data[s.INT_IDX] = [int(t[0]) for t in var.integer_idx]
+         return data, inv_data
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import cvxopt
+         import cvxopt.solvers
+         # Save original cvxopt solver options.
+diff --git a/cvxpy/reductions/solvers/conic_solvers/gurobi_conif.py b/cvxpy/reductions/solvers/conic_solvers/gurobi_conif.py
+index 47f3fb58..24cc3673 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/gurobi_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/gurobi_conif.py
+@@ -126,7 +126,7 @@ class GUROBI(SCS):
+         else:
+             return failure_solution(status, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         """Returns the result of the call to the solver.
+ 
+         Parameters
+diff --git a/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py b/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
+index 27daf415..fd832315 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
+@@ -203,7 +203,7 @@ class MOSEK(ConicSolver):
+         data[s.PARAM_PROB] = problem
+         return data, inv_data
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import mosek
+ 
+         if 'dualized' in data:
+@@ -529,7 +529,7 @@ class MOSEK(ConicSolver):
+         return prim_vars
+ 
+     @staticmethod
+-    def handle_options(env, task, verbose, solver_opts):
++    def handle_options(env, task, verbose: bool, solver_opts):
+         # If verbose, then set default logging parameters.
+         import mosek
+ 
+diff --git a/cvxpy/reductions/solvers/conic_solvers/nag_conif.py b/cvxpy/reductions/solvers/conic_solvers/nag_conif.py
+index 5c19799e..735881c6 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/nag_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/nag_conif.py
+@@ -186,7 +186,7 @@ class NAG(ConicSolver):
+             dual_vars = None
+         return Solution(status, opt_val, primal_vars, dual_vars, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         from naginterfaces.library import opt
+         from naginterfaces.base import utils
+ 
+diff --git a/cvxpy/reductions/solvers/conic_solvers/scs_conif.py b/cvxpy/reductions/solvers/conic_solvers/scs_conif.py
+index 3486662e..7cfd66a3 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/scs_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/scs_conif.py
+@@ -277,7 +277,7 @@ class SCS(ConicSolver):
+         else:
+             return failure_solution(status, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         """Returns the result of the call to the solver.
+ 
+         Parameters
+diff --git a/cvxpy/reductions/solvers/conic_solvers/xpress_conif.py b/cvxpy/reductions/solvers/conic_solvers/xpress_conif.py
+index f20552a9..a26695fb 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/xpress_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/xpress_conif.py
+@@ -24,7 +24,7 @@ from cvxpy.reductions.solvers import utilities
+ import numpy as np
+ 
+ 
+-def makeMstart(A, n, ifCol=1):
++def makeMstart(A, n, ifCol: int = 1):
+     mstart = np.bincount(A.nonzero()[ifCol])
+     mstart = np.concatenate((np.array([0], dtype=np.int64),
+                              mstart,
+@@ -134,7 +134,7 @@ class XPRESS(SCS):
+ 
+         return Solution(status, opt_val, primal_vars, dual_vars, other)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+ 
+         import xpress as xp
+ 
+diff --git a/cvxpy/reductions/solvers/constant_solver.py b/cvxpy/reductions/solvers/constant_solver.py
+index 99025ea3..0477b50d 100644
+--- a/cvxpy/reductions/solvers/constant_solver.py
++++ b/cvxpy/reductions/solvers/constant_solver.py
+@@ -27,11 +27,11 @@ class ConstantSolver(Solver):
+     def is_installed(self) -> bool:
+         return True
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         return self.solve(data, warm_start, verbose, solver_opts)
+ 
+-    def solve(self, problem, warm_start, verbose, solver_opts):
+-        if all(c.value for c in problem.constraints):
++    def solve(self, problem, warm_start: bool, verbose: bool, solver_opts):
++        if all(c.value() for c in problem.constraints):
+             return Solution(s.OPTIMAL, problem.objective.value, {}, {}, {})
+         else:
+             return Solution(s.INFEASIBLE, None, {}, {}, {})
+diff --git a/cvxpy/reductions/solvers/intermediate_chain.py b/cvxpy/reductions/solvers/intermediate_chain.py
+index 2a46087d..9e0ed786 100644
+--- a/cvxpy/reductions/solvers/intermediate_chain.py
++++ b/cvxpy/reductions/solvers/intermediate_chain.py
+@@ -24,7 +24,7 @@ from cvxpy.reductions.qp2quad_form import qp2symbolic_qp
+ from cvxpy.utilities.debug_tools import build_non_disciplined_error_msg
+ 
+ 
+-def construct_intermediate_chain(problem, candidates, gp=False):
++def construct_intermediate_chain(problem, candidates, gp: bool = False):
+     """
+     Builds a chain that rewrites a problem into an intermediate
+     representation suitable for numeric reductions.
+diff --git a/cvxpy/reductions/solvers/qp_solvers/cplex_qpif.py b/cvxpy/reductions/solvers/qp_solvers/cplex_qpif.py
+index 1a136140..a218176a 100644
+--- a/cvxpy/reductions/solvers/qp_solvers/cplex_qpif.py
++++ b/cvxpy/reductions/solvers/qp_solvers/cplex_qpif.py
+@@ -76,7 +76,7 @@ class CPLEX(QpSolver):
+ 
+         return Solution(status, opt_val, primal_vars, dual_vars, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import cplex as cpx
+         P = data[s.P].tocsr()       # Convert matrix to csr format
+         q = data[s.Q]
+diff --git a/cvxpy/reductions/solvers/qp_solvers/gurobi_qpif.py b/cvxpy/reductions/solvers/qp_solvers/gurobi_qpif.py
+index f60323fa..66b7b5bc 100644
+--- a/cvxpy/reductions/solvers/qp_solvers/gurobi_qpif.py
++++ b/cvxpy/reductions/solvers/qp_solvers/gurobi_qpif.py
+@@ -102,7 +102,7 @@ class GUROBI(QpSolver):
+ 
+         return Solution(status, opt_val, primal_vars, dual_vars, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         import gurobipy as grb
+         # N.B. Here we assume that the matrices in data are in csc format
+         P = data[s.P]
+diff --git a/cvxpy/reductions/solvers/qp_solvers/osqp_qpif.py b/cvxpy/reductions/solvers/qp_solvers/osqp_qpif.py
+index 4e722ba6..203f674c 100644
+--- a/cvxpy/reductions/solvers/qp_solvers/osqp_qpif.py
++++ b/cvxpy/reductions/solvers/qp_solvers/osqp_qpif.py
+@@ -52,7 +52,7 @@ class OSQP(QpSolver):
+ 
+         return Solution(status, opt_val, primal_vars, dual_vars, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts,
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts,
+                        solver_cache=None):
+         import osqp
+         P = data[s.P]
+diff --git a/cvxpy/reductions/solvers/qp_solvers/xpress_qpif.py b/cvxpy/reductions/solvers/qp_solvers/xpress_qpif.py
+index d8b6343a..4e29921f 100644
+--- a/cvxpy/reductions/solvers/qp_solvers/xpress_qpif.py
++++ b/cvxpy/reductions/solvers/qp_solvers/xpress_qpif.py
+@@ -91,7 +91,7 @@ class XPRESS(QpSolver):
+ 
+         return Solution(status, opt_val, primal_vars, dual_vars, attr)
+ 
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+ 
+         import xpress as xp
+ 
+diff --git a/cvxpy/reductions/solvers/solver.py b/cvxpy/reductions/solvers/solver.py
+index 7eee3b8b..26c48b91 100644
+--- a/cvxpy/reductions/solvers/solver.py
++++ b/cvxpy/reductions/solvers/solver.py
+@@ -61,12 +61,12 @@ class Solver(Reduction):
+             return False
+ 
+     @abc.abstractmethod
+-    def solve_via_data(self, data, warm_start, verbose, solver_opts, solver_cache=None):
++    def solve_via_data(self, data, warm_start: bool, verbose: bool, solver_opts, solver_cache=None):
+         """Solve a problem represented by data returned from apply.
+         """
+         raise NotImplementedError()
+ 
+-    def solve(self, problem, warm_start, verbose, solver_opts):
++    def solve(self, problem, warm_start: bool, verbose: bool, solver_opts):
+         """Solve the problem and return a Solution object.
+         """
+         data, inv_data = self.apply(problem)
+diff --git a/cvxpy/reductions/solvers/solving_chain.py b/cvxpy/reductions/solvers/solving_chain.py
+index f6dcb528..faa52763 100644
+--- a/cvxpy/reductions/solvers/solving_chain.py
++++ b/cvxpy/reductions/solvers/solving_chain.py
+@@ -276,7 +276,7 @@ class SolvingChain(Chain):
+         """
+         return SolvingChain(reductions=chain.reductions + self.reductions)
+ 
+-    def solve(self, problem, warm_start, verbose, solver_opts):
++    def solve(self, problem, warm_start: bool, verbose: bool, solver_opts):
+         """Solves the problem by applying the chain.
+ 
+         Applies each reduction in the chain to the problem, solves it,
+@@ -304,7 +304,7 @@ class SolvingChain(Chain):
+                                               verbose, solver_opts)
+         return self.invert(solution, inverse_data)
+ 
+-    def solve_via_data(self, problem, data, warm_start=False, verbose=False,
++    def solve_via_data(self, problem, data, warm_start: bool = False, verbose: bool = False,
+                        solver_opts={}):
+         """Solves the problem using the data output by the an apply invocation.
+ 
+diff --git a/cvxpy/tests/test_atoms.py b/cvxpy/tests/test_atoms.py
+index e056076a..c017f677 100644
+--- a/cvxpy/tests/test_atoms.py
++++ b/cvxpy/tests/test_atoms.py
+@@ -500,6 +500,10 @@ class TestAtoms(BaseTest):
+         with self.assertRaises(TypeError) as cm:
+             cp.vstack()
+ 
++        # Test scalars with variables of shape (1,)
++        expr = cp.vstack([2, Variable((1,))])
++        self.assertEqual(expr.shape, (2, 1))
++
+     def test_reshape(self) -> None:
+         """Test the reshape class.
+         """
+diff --git a/cvxpy/tests/test_cone2cone.py b/cvxpy/tests/test_cone2cone.py
+index 2bbd5c38..e4954acf 100644
+--- a/cvxpy/tests/test_cone2cone.py
++++ b/cvxpy/tests/test_cone2cone.py
+@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
+ import unittest
++import pytest
+ import numpy as np
+ import cvxpy as cp
+ import scipy as sp
+@@ -354,6 +355,7 @@ class TestSlacks(BaseTest):
+             sth.verify_objective(places=4)
+             sth.verify_primal_values(places=4)
+ 
++    @pytest.mark.skip(reason="Known bug in ECOS BB")
+     def test_mi_socp_1(self):
+         sth = STH.mi_socp_1()
+         for affine in TestSlacks.AFF_SOCP_CASES:
+@@ -434,7 +436,7 @@ class TestPowND(BaseTest):
+         pass
+ 
+     @staticmethod
+-    def pcp_4(ceei=True):
++    def pcp_4(ceei: bool = True):
+         """
+         A power cone formulation of a Fisher market equilibrium pricing model.
+         ceei = Competitive Equilibrium from Equal Incomes
+diff --git a/cvxpy/tests/test_conic_solvers.py b/cvxpy/tests/test_conic_solvers.py
+index c5885e82..ca403a63 100644
+--- a/cvxpy/tests/test_conic_solvers.py
++++ b/cvxpy/tests/test_conic_solvers.py
+@@ -1419,11 +1419,13 @@ class TestECOS_BB(unittest.TestCase):
+     def test_ecos_bb_mi_lp_0(self) -> None:
+         StandardTestLPs.test_mi_lp_0(solver='ECOS_BB')
+ 
++    @pytest.mark.skip(reason="Known bug in ECOS BB")
+     def test_ecos_bb_mi_lp_2(self) -> None:
+         StandardTestLPs.test_mi_lp_2(solver='ECOS_BB')
+ 
+     def test_ecos_bb_mi_lp_3(self) -> None:
+         StandardTestLPs.test_mi_lp_3(solver='ECOS_BB')
+ 
++    @pytest.mark.skip(reason="Known bug in ECOS BB")
+     def test_ecos_bb_mi_socp_1(self) -> None:
+         StandardTestSOCPs.test_mi_socp_1(solver='ECOS_BB')
+diff --git a/cvxpy/tests/test_dgp.py b/cvxpy/tests/test_dgp.py
+index 3d775dd2..6a431b4b 100644
+--- a/cvxpy/tests/test_dgp.py
++++ b/cvxpy/tests/test_dgp.py
+@@ -1,6 +1,7 @@
+ import cvxpy
+ from cvxpy.tests.base_test import BaseTest
+ import numpy as np
++import scipy.sparse as sp
+ 
+ 
+ class TestDgp(BaseTest):
+@@ -202,3 +203,7 @@ class TestDgp(BaseTest):
+         x = cvxpy.Variable(pos=True)
+         self.assertTrue((x**1).is_nonneg())
+         self.assertFalse((x**1).is_nonpos())
++
++    def test_sparse_constant_not_allowed(self) -> None:
++        sparse_matrix = cvxpy.Constant(sp.csc_matrix(np.array([1.0, 2.0])))
++        self.assertFalse(sparse_matrix.is_log_log_constant())
+diff --git a/cvxpy/tests/test_matrices.py b/cvxpy/tests/test_matrices.py
+index feaa8e31..14834911 100644
+--- a/cvxpy/tests/test_matrices.py
++++ b/cvxpy/tests/test_matrices.py
+@@ -13,6 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++import unittest
++import sys
++from typing import Tuple
+ 
+ from cvxpy.expressions.expression import Expression
+ from cvxpy.constraints.constraint import Constraint
+@@ -20,15 +23,14 @@ from cvxpy.expressions.variable import Variable
+ import cvxpy.interface.matrix_utilities as intf
+ import numpy
+ import scipy.sparse as sp
+-import unittest
+-import sys
++
+ PY35 = sys.version_info >= (3, 5)
+ 
+ 
+ class TestMatrices(unittest.TestCase):
+     """ Unit tests for testing different forms of matrices as constants. """
+ 
+-    def assertExpression(self, expr, shape) -> None:
++    def assertExpression(self, expr, shape: Tuple[int, ...]) -> None:
+         """Asserts that expr is an Expression with dimension shape.
+         """
+         assert isinstance(expr, Expression) or isinstance(expr, Constraint)
+diff --git a/cvxpy/tests/test_problem.py b/cvxpy/tests/test_problem.py
+index 1cd65533..3d59d118 100644
+--- a/cvxpy/tests/test_problem.py
++++ b/cvxpy/tests/test_problem.py
+@@ -312,7 +312,7 @@ class TestProblem(BaseTest):
+         result = p.solve(method="test")
+         self.assertEqual(result, 1)
+ 
+-        def test(self, a, b=2):
++        def test(self, a, b: int = 2):
+             return (a, b)
+         Problem.register_solve("test", test)
+         p = Problem(cp.Minimize(0))
+@@ -1929,3 +1929,31 @@ class TestProblem(BaseTest):
+         problem = cp.Problem(cp.Maximize(obj), [x == 1, y == 2])
+         result = problem.solve()
+         self.assertAlmostEqual(result, 10)
++
++    def test_constant_infeasible(self) -> None:
++        """Test a problem with constant values only that is infeasible.
++        """
++        p = cp.Problem(cp.Maximize(0), [cp.Constant(0) == 1])
++        p.solve()
++        self.assertEquals(p.status, cp.INFEASIBLE)
++
++    def test_huber_scs(self) -> None:
++        """Test that huber regression works with SCS.
++           See issue #1370.
++        """
++        np.random.seed(1)
++        m = 5
++        n = 2
++
++        x0 = np.random.randn(n)
++        A = np.random.randn(m, n)
++        b = A.dot(x0) + 0.01 * np.random.randn(m)
++        # Add outlier noise.
++        k = int(0.02 * m)
++        idx = np.random.randint(m, size=k)
++        b[idx] += 10 * np.random.randn(k)
++
++        x = cp.Variable(n)
++        prob = cp.Problem(cp.Minimize(cp.sum(cp.huber(A @ x - b))))
++
++        prob.solve(solver=cp.SCS)
+diff --git a/cvxpy/transforms/indicator.py b/cvxpy/transforms/indicator.py
+index 2d482ba6..c46bd10b 100644
+--- a/cvxpy/transforms/indicator.py
++++ b/cvxpy/transforms/indicator.py
+@@ -31,7 +31,7 @@ class indicator(Expression):
+        A numeric tolerance for determining whether the constraints hold.
+     """
+ 
+-    def __init__(self, constraints, err_tol=1e-3):
++    def __init__(self, constraints, err_tol: float = 1e-3):
+         self.args = constraints
+         self.err_tol = err_tol
+         super(indicator, self).__init__()
+diff --git a/cvxpy/transforms/scalarize.py b/cvxpy/transforms/scalarize.py
+index fcb7f93a..b103e8c2 100644
+--- a/cvxpy/transforms/scalarize.py
++++ b/cvxpy/transforms/scalarize.py
+@@ -36,7 +36,7 @@ def weighted_sum(objectives: List[Objective], weights) -> Expression:
+     return sum(objectives[i]*weights[i] for i in range(num_objs))
+ 
+ 
+-def targets_and_priorities(objectives, priorities, targets, limits=None, off_target=1e-5):
++def targets_and_priorities(objectives, priorities, targets, limits=None, off_target: float = 1e-5):
+     """Combines objectives with penalties within a range between target and limit.
+ 
+     Each Minimize objective i has value
+@@ -101,7 +101,7 @@ def max(objectives, weights):
+     return Minimize(expr)
+ 
+ 
+-def log_sum_exp(objectives, weights, gamma=1):
++def log_sum_exp(objectives, weights, gamma: float = 1.0):
+     """Combines objectives as log_sum_exp of weighted terms.
+ 
+ 
+diff --git a/cvxpy/utilities/key_utils.py b/cvxpy/utilities/key_utils.py
+index 0d91ae2e..6f185b23 100644
+--- a/cvxpy/utilities/key_utils.py
++++ b/cvxpy/utilities/key_utils.py
+@@ -17,7 +17,7 @@ limitations under the License.
+ # Utility functions to handle indexing/slicing into an expression.
+ 
+ from __future__ import division
+-from typing import Optional
++from typing import Optional, Tuple
+ 
+ import numpy as np
+ import numbers
+@@ -25,7 +25,7 @@ import numbers
+ 
+ # TODO(akshayka): This module needs to be updated in order to handle
+ # NumPy 0/1D arrays.
+-def validate_key(key, shape):
++def validate_key(key, shape: Tuple[int, ...]):
+     """Check if the key is a valid index.
+ 
+     Args:
+@@ -108,7 +108,7 @@ def to_int(val, none_val=None):
+         return int(val)
+ 
+ 
+-def wrap_neg_index(index, dim, neg_step=False):
++def wrap_neg_index(index, dim, neg_step: bool = False):
+     """Converts a negative index into a positive index.
+ 
+     Args:
+@@ -168,7 +168,7 @@ def is_single_index(slc) -> bool:
+         slc.start + step >= slc.stop
+ 
+ 
+-def shape(key, orig_key, shape):
++def shape(key, orig_key, shape: Tuple[int, ...]):
+     """Finds the dimensions of a sliced expression.
+ 
+     Args:
+diff --git a/cvxpy/utilities/power_tools.py b/cvxpy/utilities/power_tools.py
+index 1e6d05ff..f81bf45b 100644
+--- a/cvxpy/utilities/power_tools.py
++++ b/cvxpy/utilities/power_tools.py
+@@ -83,7 +83,7 @@ def gm_constrs(t, x_list, p):
+     return constraints
+ 
+ 
+-def pow_high(p, max_denom=1024):
++def pow_high(p, max_denom: int = 1024):
+     """ Return (t,1,x) power tuple
+ 
+         x <= t^(1/p) 1^(1-1/p)
+@@ -97,7 +97,7 @@ def pow_high(p, max_denom=1024):
+     return 1/p, (p, 1-p)
+ 
+ 
+-def pow_mid(p, max_denom=1024):
++def pow_mid(p, max_denom: int = 1024):
+     """ Return (x,1,t) power tuple
+ 
+         t <= x^p 1^(1-p)
+@@ -109,7 +109,7 @@ def pow_mid(p, max_denom=1024):
+     return p, (p, 1-p)
+ 
+ 
+-def pow_neg(p, max_denom=1024):
++def pow_neg(p, max_denom: int = 1024):
+     """ Return (x,t,1) power tuple
+ 
+         1 <= x^(p/(p-1)) t^(-1/(p-1))
+@@ -223,7 +223,7 @@ def is_weight(w) -> bool:
+     return valid_elems and sum(w) == 1
+ 
+ 
+-def fracify(a, max_denom=1024, force_dyad=False):
++def fracify(a, max_denom: int = 1024, force_dyad: bool = False):
+     """ Return a valid fractional weight tuple (and its dyadic completion)
+         to represent the weights given by ``a``.
+ 
+diff --git a/cvxpy/utilities/shape.py b/cvxpy/utilities/shape.py
+index 129fb939..be88e8c1 100644
+--- a/cvxpy/utilities/shape.py
++++ b/cvxpy/utilities/shape.py
+@@ -13,13 +13,14 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from typing import List, Tuple
+ 
+ 
+-def squeezed(shape):
++def squeezed(shape: Tuple[int, ...]) -> Tuple[int, ...]:
+     return tuple(dim for dim in shape if dim != 1)
+ 
+ 
+-def sum_shapes(shapes):
++def sum_shapes(shapes: List[Tuple[int, ...]]) -> Tuple[int, ...]:
+     """Give the shape resulting from summing a list of shapes.
+ 
+     Summation semantics are exactly the same as NumPy's, including
+@@ -64,7 +65,9 @@ def sum_shapes(shapes):
+     return tuple(shape)
+ 
+ 
+-def mul_shapes_promote(lh_shape, rh_shape):
++def mul_shapes_promote(
++    lh_shape: Tuple[int, ...], rh_shape: Tuple[int, ...]
++) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[int, ...]]:
+     """Promotes shapes as necessary and returns promoted shape of product.
+ 
+     If lh_shape is of length one, prepend a one to it.
+@@ -111,7 +114,7 @@ def mul_shapes_promote(lh_shape, rh_shape):
+             tuple(list(lh_shape[:-2]) + [lh_mat_shape[0]] + [rh_mat_shape[1]]))
+ 
+ 
+-def mul_shapes(lh_shape, rh_shape):
++def mul_shapes(lh_shape: Tuple[int, ...], rh_shape: Tuple[int, ...]) -> Tuple[int, ...]:
+     """Give the shape resulting from multiplying two shapes.
+ 
+     Adheres the semantics of np.matmul and additionally permits multiplication
+diff --git a/doc/source/contributing/index.rst b/doc/source/contributing/index.rst
+index c8b7261a..91bb8695 100644
+--- a/doc/source/contributing/index.rst
++++ b/doc/source/contributing/index.rst
+@@ -493,9 +493,46 @@ call modified versions of a test with different solver parameters, for example
+         # require a basic feasible solution
+         StandardTestLPs.test_lp_1(solver='MOSEK', places=6, bfs=True)
+ 
++.. _contrib_roadmap:
++
++Development roadmap
++-------------------
++
++This roadmap highlights the development goals for the next minor and major release of CVXPY.
++New contributors are encouraged to focus on the development goals marked [Small].
++If you are interested in working on a [Large] development goal, please contact a project maintainer.
++
++.. _contrib_minor_roadmap
++
++CVXPY 1.2
++~~~~~~~~~
++
++- Move CI from Travis-CI to Github actions. [Large]
++- Add CI for Gurobi, CPLEX, GLPK, Cbc, and SCIP. [Small]
++- `Post-solver feasibility checks <https://github.com/cvxgrp/cvxpy/issues/582>`_. [Small]
++- `Developer documentation for key reduction files <https://github.com/cvxgrp/cvxpy/issues/582>`_. [Small]
++- `State required cone types for atoms <https://github.com/cvxgrp/cvxpy/issues/574>`_. [Small]
++
++.. _contrib_major_roadmap
++
++CVXPY 2.0
++~~~~~~~~~
++
++- Problem serialization [`532 <https://github.com/cvxgrp/cvxpy/issues/532>`_, `1333 <https://github.com/cvxpy/cvxpy/issues/1333>`_] [Large]
++- Pretty print method for summarizing a solution and its dual variables. [Large]
++- `Code generation for quadratic programs and cone programs <https://github.com/cvxpy/cvxpy/issues/1273>`_. [Large]
++- `Support for n-dimensional expressions, variables, parameters, etc <https://github.com/cvxpy/cvxpy/issues/198>`_. [Large]
++- `10x improvement in the speed and memory usage of cvxcore <https://github.com/cvxpy/cvxpy/issues/708>`_, `especially for DPP problems <https://github.com/cvxpy/cvxpy/issues/1332>`_. [Large]
++- Sophisticated affine transformations: [`457 <https://github.com/cvxgrp/cvxpy/issues/457>`_, `563 <https://github.com/cvxgrp/cvxpy/issues/563>`_, `808 <https://github.com/cvxgrp/cvxpy/issues/808>`_]. [Small]
++- Full compatibility with NumPy broadcasting rules. [Large]
++
++
++
++
++
+ 
+ 
+ .. _Anaconda: https://store.continuum.io/cshop/anaconda/
+ .. _CVXOPT: http://cvxopt.org/
+ .. _NumPy: http://www.numpy.org/
+-.. _SciPy: http://www.scipy.org/
+\ No newline at end of file
++.. _SciPy: http://www.scipy.org/
+diff --git a/doc/source/install/index.rst b/doc/source/install/index.rst
+index 93890687..a1532cbd 100644
+--- a/doc/source/install/index.rst
++++ b/doc/source/install/index.rst
+@@ -44,8 +44,8 @@ conda
+ 2. Create a new conda environment,
+   ::
+ 
+-      conda create --name cvxpy
+-      conda activate cvxpy
++      conda create --name cvxpy_env
++      conda activate cvxpy_env
+ 
+  or activate an existing one
+ 
+@@ -69,7 +69,7 @@ We strongly recommend using a fresh virtual environment (virtualenv or conda) wh
+ 
+ CVXPY has the following dependencies:
+ 
+- * Python 3.5, 3.6, or 3.7.
++ * Python >= 3.5
+  * `OSQP`_
+  * `ECOS`_ >= 2
+  * `SCS`_ >= 1.1.3
+@@ -157,13 +157,6 @@ CVXPY supports the CPLEX solver.
+ Simply install CPLEX such that you can ``import cplex`` in Python.
+ See the `CPLEX <https://www.ibm.com/support/knowledgecenter/SSSA5P>`_ website for installation instructions.
+ 
+-Install with XPRESS support
+---------------------------
+-
+-CVXPY supports the FICO Xpress solver.
+-Simply install XPRESS such that you can ``import xpress`` in Python.
+-See the `Xpress Python documentation <https://www.fico.com/fico-xpress-optimization/docs/latest/solver/optimizer/python/HTML/GUID-616C323F-05D8-3460-B0D7-80F77DA7D046.html>`_ pages for installation instructions.
+-
+ Install with SDPT3 support
+ --------------------------
+ 
+diff --git a/doc/sphinxext/docscrape.py b/doc/sphinxext/docscrape.py
+index 646bcf56..92160dd3 100644
+--- a/doc/sphinxext/docscrape.py
++++ b/doc/sphinxext/docscrape.py
+@@ -410,7 +410,7 @@ class NumpyDocString:
+         return '\n'.join(out)
+ 
+ 
+-def indent(str,indent=4):
++def indent(str, indent: int = 4):
+     indent_str = ' '*indent
+     if str is None:
+         return indent_str
+diff --git a/examples/communications/Channel_capacity_BV4.57.py b/examples/communications/Channel_capacity_BV4.57.py
+index acc9d8d7..c80bd1b1 100644
+--- a/examples/communications/Channel_capacity_BV4.57.py
++++ b/examples/communications/Channel_capacity_BV4.57.py
+@@ -28,11 +28,11 @@ Input parameters
+   m: size of output
+ '''
+ 
+-def channel_capacity(n,m,sum_x=1):
++def channel_capacity(n, m, sum_x: float = 1.0):
+   '''
+ Boyd and Vandenberghe, Convex Optimization, exercise 4.57 page 207
+ Capacity of a communication channel.
+-  
++
+ We consider a communication channel, with input x(t)∈{1,..,n} and
+ output Y(t)∈{1,...,m}, for t=1,2,... .The relation between the
+ input and output is given statistically:
+diff --git a/examples/communications/optimal_power_Gaussian_channel_BV4.62.py b/examples/communications/optimal_power_Gaussian_channel_BV4.62.py
+index 615fd97d..11c7f773 100644
+--- a/examples/communications/optimal_power_Gaussian_channel_BV4.62.py
++++ b/examples/communications/optimal_power_Gaussian_channel_BV4.62.py
+@@ -22,7 +22,7 @@ import numpy as np
+ import cvxpy as cvx
+ 
+ '''
+-Input parameters   
++Input parameters
+   n: number of receivers
+   a_val: Positive bit rate coefficient for each receiver
+   b_val: Positive signal to noise ratio coefficient for each receiver
+@@ -30,7 +30,7 @@ Input parameters
+   W_tot: Total bandwidth available to all channels
+ '''
+ 
+-def optimal_power(n, a_val, b_val, P_tot=1.0, W_tot=1.0):
++def optimal_power(n, a_val, b_val, P_tot: float = 1.0, W_tot: float = 1.0):
+   '''
+ Boyd and Vandenberghe, Convex Optimization, exercise 4.62 page 210
+ Optimal power and bandwidth allocation in a Gaussian broadcast channel.
+diff --git a/examples/communications/water_filling_BVex5.2.py b/examples/communications/water_filling_BVex5.2.py
+index 3f4df697..8d7c52dc 100644
+--- a/examples/communications/water_filling_BVex5.2.py
++++ b/examples/communications/water_filling_BVex5.2.py
+@@ -22,22 +22,22 @@ import numpy as np
+ import cvxpy as cvx
+ 
+ '''
+-Input parameters   
++Input parameters
+   n: Number of communication channels or 'buckets'
+   a: Floor above the baseline for each channel at which power can be added
+   sum_x: Total power to be allocated to the n channels
+ '''
+ 
+-def water_filling(n,a,sum_x=1):
++def water_filling(n, a, sum_x: float = 1):
+   '''
+ Boyd and Vandenberghe, Convex Optimization, example 5.2 page 145
+ Water-filling.
+-  
++
+ This problem arises in information theory, in allocating power to a set of
+ n communication channels in order to maximise the total channel capacity.
+-The variable x_i represents the transmitter power allocated to the ith channel, 
+-and log(α_i+x_i) gives the capacity or maximum communication rate of the channel. 
+-The objective is to minimize  -∑log(α_i+x_i) subject to the constraint ∑x_i = 1 
++The variable x_i represents the transmitter power allocated to the ith channel,
++and log(α_i+x_i) gives the capacity or maximum communication rate of the channel.
++The objective is to minimize  -∑log(α_i+x_i) subject to the constraint ∑x_i = 1
+   '''
+   # Declare variables and parameters
+   x = cvx.Variable(n)
+diff --git a/examples/expr_trees/1D_convolution.py b/examples/expr_trees/1D_convolution.py
+index c03ab85b..2f49f17f 100644
+--- a/examples/expr_trees/1D_convolution.py
++++ b/examples/expr_trees/1D_convolution.py
+@@ -22,7 +22,7 @@ import random
+ 
+ from math import pi, sqrt, exp
+ 
+-def gauss(n=11,sigma=1):
++def gauss(n: float = 11, sigma: float = 1):
+     r = range(-int(n/2),int(n/2)+1)
+     return [1 / (sigma * sqrt(2*pi)) * exp(-float(x)**2/(2*sigma**2)) for x in r]
+ 
+diff --git a/examples/expr_trees/helloworld.py b/examples/expr_trees/helloworld.py
+index 003bc502..926d530f 100644
+--- a/examples/expr_trees/helloworld.py
++++ b/examples/expr_trees/helloworld.py
+@@ -22,7 +22,7 @@ import random
+ 
+ from math import pi, sqrt, exp
+ 
+-def gauss(n=11,sigma=1):
++def gauss(n: float = 11,sigma: float = 1):
+     r = range(-int(n/2),int(n/2)+1)
+     return [1 / (sigma * sqrt(2*pi)) * exp(-float(x)**2/(2*sigma**2)) for x in r]
+ 
+diff --git a/examples/extensions/mixed_integer/admm_problem.py b/examples/extensions/mixed_integer/admm_problem.py
+index 986eda33..58aafe4e 100644
+--- a/examples/extensions/mixed_integer/admm_problem.py
++++ b/examples/extensions/mixed_integer/admm_problem.py
+@@ -20,7 +20,7 @@ from cvxpy import settings as s
+ import numpy as np
+ 
+ # Use ADMM to attempt non-convex problem.
+-def admm(self, rho=0.5, iterations=5, *args, **kwargs):
++def admm(self, rho: float = 0.5, iterations: int = 5, *args, **kwargs):
+     noncvx_vars = []
+     for var in self.variables():
+         if getattr(var, "noncvx", False):
+@@ -40,7 +40,7 @@ def admm(self, rho=0.5, iterations=5, *args, **kwargs):
+     return polish(self, noncvx_vars, *args, **kwargs)
+ 
+ # Use ADMM to attempt non-convex problem.
+-def admm2(self, rho=0.5, iterations=5, *args, **kwargs):
++def admm2(self, rho: float = 0.5, iterations: int = 5, *args, **kwargs):
+     noncvx_vars = []
+     for var in self.variables():
+         if getattr(var, "noncvx", False):
+diff --git a/examples/extensions/mixed_integer/card.py b/examples/extensions/mixed_integer/card.py
+index 59bf0151..c3736b34 100644
+--- a/examples/extensions/mixed_integer/card.py
++++ b/examples/extensions/mixed_integer/card.py
+@@ -21,7 +21,7 @@ from itertools import product
+ class Card(NonCvxVariable):
+     """ A variable with constrained cardinality. """
+     # k - the maximum cardinality of the variable.
+-    def __init__(self, rows=1, cols=1, k=None, *args, **kwargs):
++    def __init__(self, rows: int = 1, cols: int = 1, k=None, *args, **kwargs):
+         self.k = k
+         super(Card, self).__init__(rows, cols, *args, **kwargs)
+ 
+diff --git a/examples/extensions/mixed_integer/choose.py b/examples/extensions/mixed_integer/choose.py
+index a203ee8b..a013f183 100644
+--- a/examples/extensions/mixed_integer/choose.py
++++ b/examples/extensions/mixed_integer/choose.py
+@@ -21,7 +21,7 @@ from itertools import product
+ 
+ class Choose(Boolean):
+     """ A variable with k 1's and all other entries 0. """
+-    def __init__(self, rows=1, cols=1, k=None, *args, **kwargs):
++    def __init__(self, rows: int = 1, cols: int = 1, k=None, *args, **kwargs):
+         self.k = k
+         super(Choose, self).__init__(rows, cols, *args, **kwargs)
+ 
+diff --git a/examples/extensions/ncvx/boolean.py b/examples/extensions/ncvx/boolean.py
+index 9a72369a..86a5e2a3 100644
+--- a/examples/extensions/ncvx/boolean.py
++++ b/examples/extensions/ncvx/boolean.py
+@@ -20,7 +20,7 @@ import cvxopt
+ import numpy as np
+ 
+ class Boolean(Variable):
+-    def __init__(self, rows=1, cols=1, *args, **kwargs):
++    def __init__(self, rows: int = 1, cols: int = 1, *args, **kwargs):
+         self._LB = Parameter(rows, cols)
+         self._LB.value = cvxopt.matrix(0,(rows, cols), tc='d')
+         self._UB = Parameter(rows, cols)
+diff --git a/examples/extensions/ncvx/branch_and_bound.py b/examples/extensions/ncvx/branch_and_bound.py
+index 3733c5f3..dbfa80c5 100644
+--- a/examples/extensions/ncvx/branch_and_bound.py
++++ b/examples/extensions/ncvx/branch_and_bound.py
+@@ -105,7 +105,7 @@ def solve_wrapper(prob, i, booleans, depth, epsilon):
+     # return best guess so far
+     return solution
+ 
+-def branch_and_bound(self, depth=5, epsilon=1e-3):
++def branch_and_bound(self, depth: int = 5, epsilon: float = 1e-3):
+     objective, constr_map = self.canonicalize()
+     dims = self._format_for_solver(constr_map, s.ECOS)
+ 
+diff --git a/examples/flows/commodity_flow.py b/examples/flows/commodity_flow.py
+index 08ee5e38..0589b7d2 100644
+--- a/examples/flows/commodity_flow.py
++++ b/examples/flows/commodity_flow.py
+@@ -39,7 +39,7 @@ class MultiEdge(Edge):
+ 
+ class MultiNode(Node):
+     """ A node with a target flow accumulation and a capacity. """
+-    def __init__(self, capacity=0):
++    def __init__(self, capacity: float = 0.0):
+         self.capacity = capacity
+         self.edge_flows = []
+ 
+diff --git a/examples/flows/max_flow.py b/examples/flows/max_flow.py
+index 089dfa3f..af0351a6 100644
+--- a/examples/flows/max_flow.py
++++ b/examples/flows/max_flow.py
+@@ -36,7 +36,7 @@ class Edge:
+ 
+ class Node:
+     """ A node with accumulation. """
+-    def __init__(self, accumulation=0):
++    def __init__(self, accumulation: float = 0.0):
+         self.accumulation = accumulation
+         self.edge_flows = []
+ 
+diff --git a/examples/fmmc.py b/examples/fmmc.py
+index 48663b22..b8c964ef 100644
+--- a/examples/fmmc.py
++++ b/examples/fmmc.py
+@@ -32,7 +32,7 @@ def antiadjacency(g):
+         a[x].append(y)
+   return a
+ 
+-def FMMC(g,verbose=False):
++def FMMC(g,verbose: bool = False):
+   # Fastest-mixing Markov chain on the graph g
+   # this is formulation (5), p.672
+   # Boyd, Diaconis, and Xiao SIAM Rev. 46 (2004) 667-689
+@@ -50,7 +50,7 @@ def FMMC(g,verbose=False):
+   if verbose: print('status: %s.'%prob.status,'optimal value=%.6f'%prob.value)
+   return prob.status,prob.value,P.value
+ 
+-def print_result(P,n,eps=1e-8):
++def print_result(P, n, eps: float = 1e-8):
+   for row in P:
+     for i in range(n):
+       x=row[0,i]
+diff --git a/examples/machine_learning/lasso_regression.py b/examples/machine_learning/lasso_regression.py
+index f94e1fee..22c5fa59 100644
+--- a/examples/machine_learning/lasso_regression.py
++++ b/examples/machine_learning/lasso_regression.py
+@@ -19,7 +19,7 @@ def mse(X, Y, beta):
+     return (1.0 / X.shape[0]) * loss_fn(X, Y, beta).value
+ 
+ 
+-def generate_data(m=100, n=20, sigma=5, density=0.2):
++def generate_data(m: int = 100, n: int = 20, sigma: int = 5, density: float = 0.2):
+     "Generates data matrix X and observations Y."
+     np.random.seed(1)
+     beta_star = np.random.randn(n)
+diff --git a/examples/machine_learning/ridge_regression.py b/examples/machine_learning/ridge_regression.py
+index c2e1210c..cd000fb0 100644
+--- a/examples/machine_learning/ridge_regression.py
++++ b/examples/machine_learning/ridge_regression.py
+@@ -19,7 +19,7 @@ def mse(X, Y, beta):
+     return (1.0 / X.shape[0]) * loss_fn(X, Y, beta).value
+ 
+ 
+-def generate_data(m=1000, n=30, sigma=40):
++def generate_data(m: int = 1000, n: int = 30, sigma: int = 40):
+     """Generates data for regression.
+ 
+     To experiment with your own data, just replace the contents of this
+diff --git a/examples/relax_and_round.py b/examples/relax_and_round.py
+index 8fd7e5f1..c1d1c535 100644
+--- a/examples/relax_and_round.py
++++ b/examples/relax_and_round.py
+@@ -93,7 +93,7 @@ numpy.random.seed(1)
+ 
+ # Min sum_squares(A*x + B*z - c)
+ # z boolean.
+-def example(n, get_vals=False):
++def example(n, get_vals: bool = False):
+     print ("n = %d #################" % n)
+     m = 2*n
+     A = numpy.matrix(numpy.random.randn(m, n))
+diff --git a/pyproject.toml b/pyproject.toml
+index d1405326..15847a82 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -1,9 +1,9 @@
+ [build-system]
+ requires = [
+-    "numpy==1.15; python_version=='3.6'",
+-    "numpy==1.15; python_version=='3.7'",
+-    "numpy==1.16; python_version=='3.8'",
+-    "numpy==1.19; python_version=='3.9'",
++    "numpy>=1.15,<1.16; python_version=='3.6'",
++    "numpy>=1.15,<1.16; python_version=='3.7'",
++    "numpy>=1.16,<1.17; python_version=='3.8'",
++    "numpy>=1.19,<1.20; python_version=='3.9'",
+     "scipy >= 1.1.0",
+     "setuptools>=40.8.0",
+     "wheel"
+-- 
+2.31.1.windows.1
+

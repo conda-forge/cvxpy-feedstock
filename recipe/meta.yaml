@@ -9,6 +9,8 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: b499ebfae4fc645e9523621573ffcb1c5b6854a1b5c0ce1d66a8a9a458605807
   patches:
+    # debug only: fast-forward from tags/v1.1.12 until 86307f2
+    - patches/monster-patch-for-tags-v1.1.12-until-86307f2.patch
     - patches/0001-remove-pyproject.toml.patch
     - patches/0002-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
     - patches/0003-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
