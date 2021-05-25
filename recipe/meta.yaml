@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.1.12" %}
+{% set version = "1.1.13" %}
 
 package:
   name: cvxpy-split
@@ -7,12 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: b499ebfae4fc645e9523621573ffcb1c5b6854a1b5c0ce1d66a8a9a458605807
+  sha256: a9c781e74ad76097b47b86456cb3a943898f7ec9ac8f47bcefc922051cdc4a04
   patches:
     - patches/0001-remove-pyproject.toml.patch
-    - patches/0002-add-skip-for-test_ecos_bb_mi_lp_2.patch             # [aarch64]
-    - patches/0003-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
-    - patches/0004-skip-benchmark-tests-on-windows.patch               # [win]
+    - patches/0002-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
+    - patches/0003-skip-benchmark-tests-on-windows.patch               # [win]
 
 build:
   number: 0
@@ -118,7 +117,7 @@ about:
     follows the math, rather than in the restrictive standard form required
     by solvers.
   doc_url: http://www.cvxpy.org/
-  dev_url: https://github.com/cvxgrp/cvxpy
+  dev_url: https://github.com/cvxpy/cvxpy
 
 extra:
   recipe-maintainers:
