@@ -9,7 +9,7 @@ Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cvxpy-feedstock
 
 Summary: A Python-embedded modeling language for convex optimization problems
 
-Development: https://github.com/cvxgrp/cvxpy
+Development: https://github.com/cvxpy/cvxpy
 
 Documentation: http://www.cvxpy.org/
 
