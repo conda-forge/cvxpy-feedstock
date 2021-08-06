@@ -1,0 +1,50 @@
+From 3d29ac7e303deb66fabecd0e6924f141e270d60e Mon Sep 17 00:00:00 2001
+From: Steven Diamond <diamond@cs.stanford.edu>
+Date: Thu, 5 Aug 2021 17:30:33 -0700
+Subject: [PATCH 4/4] fix #1455
+
+---
+ cvxpy/cvxcore/src/LinOpOperations.cpp |  5 ++++-
+ cvxpy/tests/test_convolution.py       | 13 +++++++++++++
+ 2 files changed, 17 insertions(+), 1 deletion(-)
+
+diff --git a/cvxpy/cvxcore/src/LinOpOperations.cpp b/cvxpy/cvxcore/src/LinOpOperations.cpp
+index e854d9f57..14af6e76a 100644
+--- a/cvxpy/cvxcore/src/LinOpOperations.cpp
++++ b/cvxpy/cvxcore/src/LinOpOperations.cpp
+@@ -434,7 +434,10 @@ Tensor get_conv_mat(const LinOp &lin, int arg_idx) {
+   Matrix constant = get_constant_data(*lin.get_linOp_data(), false);
+   int rows = lin.get_shape()[0];
+   int nonzeros = constant.rows();
+-  int cols = lin.get_args()[0]->get_shape()[0];
++  int cols = 1;
++  if (lin.get_args()[0]->get_shape().size() > 0) {
++      cols = lin.get_args()[0]->get_shape()[0];
++  }
+ 
+   Matrix toeplitz(rows, cols);
+ 
+diff --git a/cvxpy/tests/test_convolution.py b/cvxpy/tests/test_convolution.py
+index b05a72af9..5b691e35b 100644
+--- a/cvxpy/tests/test_convolution.py
++++ b/cvxpy/tests/test_convolution.py
+@@ -108,3 +108,16 @@ class TestConvolution(BaseTest):
+         v = cvx.conv(h, x)
+         obj = cvx.Minimize(cvx.sum(cvx.multiply(y, v[0:N])))
+         print(cvx.Problem(obj, []).solve(solver=cvx.ECOS))
++
++    def test_0D_conv(self) -> None:
++        """Convolution with 0D input.
++        """
++        x = cvx.Variable((1,))  # or cvx.Variable((1,1))
++        problem = cvx.Problem(
++            cvx.Minimize(
++                cvx.max(cvx.conv([1.], cvx.multiply(1., x)))
++            ),
++            [x >= 0]
++        )
++        problem.solve(cvx.ECOS)
++        assert problem.status == cvx.OPTIMAL
+-- 
+2.31.1.windows.1
+

@@ -12,6 +12,8 @@ source:
     - patches/0001-remove-pyproject.toml.patch
     - patches/0002-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
     - patches/0003-skip-benchmark-tests-on-windows.patch               # [win]
+    # fix a possible segfault; can be dropped for v>1.1.14
+    - patches/0004-fix-1455.patch
 
 build:
   number: 0
