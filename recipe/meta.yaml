@@ -45,6 +45,7 @@ outputs:
     test:
       requires:
         - pytest
+        - cvxopt
       source_files:
         - cvxpy/tests
       imports:
