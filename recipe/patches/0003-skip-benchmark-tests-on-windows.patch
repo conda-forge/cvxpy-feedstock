@@ -1,7 +1,7 @@
-From 17cf1123d0cd4713c86bab298f7ad081cbdb5544 Mon Sep 17 00:00:00 2001
+From 28aceb494c5e8d02b1d22c8faf98e191a589ed3a Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Tue, 12 Jan 2021 07:29:26 +0100
-Subject: [PATCH 3/4] skip benchmark tests on windows
+Subject: [PATCH 3/3] skip benchmark tests on windows
 
 ---
  cvxpy/tests/test_benchmarks.py | 2 ++

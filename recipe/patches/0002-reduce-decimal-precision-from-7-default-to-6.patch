@@ -1,7 +1,7 @@
-From e07aded69229ae497b9c5d6ca4a64a82c73522a4 Mon Sep 17 00:00:00 2001
+From 018cf708720ae236f2dc81422019040a3ef21476 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Mon, 11 Jan 2021 23:54:22 +0100
-Subject: [PATCH 2/4] reduce decimal precision from 7 (default) to 6
+Subject: [PATCH 2/3] reduce decimal precision from 7 (default) to 6
 
 In cvxpy.tests.test_dpp.TestDgp.test_sum_matrix
 ---
