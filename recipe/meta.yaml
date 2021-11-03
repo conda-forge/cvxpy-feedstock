@@ -10,8 +10,6 @@ source:
   sha256: 3397d3b89d770ea9f0fc359b1c9b3afede6a0d3bea1cff20e2653b13451cdb8a
   patches:
     - patches/0001-remove-pyproject.toml.patch
-    - patches/0002-reduce-decimal-precision-from-7-default-to-6.patch  # [aarch64]
-    - patches/0003-skip-benchmark-tests-on-windows.patch               # [win]
 
 build:
   number: 0
