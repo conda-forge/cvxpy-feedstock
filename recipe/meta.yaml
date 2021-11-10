@@ -10,9 +10,11 @@ source:
   sha256: 3397d3b89d770ea9f0fc359b1c9b3afede6a0d3bea1cff20e2653b13451cdb8a
   patches:
     - patches/0001-remove-pyproject.toml.patch
+    # add patch for python 3.10 compatibility, see cvxpy/cvxpy#1544
+    - patches/0002-Fix-test.patch
 
 build:
-  number: 0
+  number: 1
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
