@@ -12,7 +12,7 @@ source:
     - patches/0001-remove-pyproject.toml.patch
 
 build:
-  number: 0
+  number: 1
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
