@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.1.17" %}
+{% set version = "1.1.18" %}
 
 package:
   name: cvxpy-split
@@ -7,14 +7,14 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 3397d3b89d770ea9f0fc359b1c9b3afede6a0d3bea1cff20e2653b13451cdb8a
+  sha256: 5baefe1f2ed6937749b293586c6ce4f42ed30e7890223f7661ccb2bb7df70bef
   patches:
     - patches/0001-remove-pyproject.toml.patch
     # add patch for python 3.10 compatibility, see cvxpy/cvxpy#1544
     - patches/0002-Fix-test.patch
 
 build:
-  number: 1
+  number: 0
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
