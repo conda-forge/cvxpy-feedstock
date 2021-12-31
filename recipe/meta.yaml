@@ -49,7 +49,9 @@ outputs:
         - cvxpy.cvxcore
         - cvxpy.cvxcore.python
       commands:
-        - pytest cvxpy/tests -v
+        # tests on aarch run into problems with static vs. dynamic TLS in libgomp,
+        # see https://github.com/conda-forge/conda-forge.github.io/issues/1551
+        - pytest cvxpy/tests -v  # [build_platform == target_platform]
 
   - name: cvxpy-base
     build:
