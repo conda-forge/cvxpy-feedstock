@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.2.1" %}
+{% set version = "1.2.2" %}
 
 package:
   name: cvxpy-split
@@ -7,9 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 6d67642643d1ddb2f2af59b466b87d42c4a2e367831ad7b43c33b59eefa5b50e
+  sha256: c8e91545585eb632ce030fbf2c301d573ec3cf7971f9a387a0f0a61a2feae6b8
   patches:
     - patches/0001-remove-pyproject.toml.patch
+    # backport cvxpy/cvxpy/1931 for compatibility with scipy 1.9; can be dropped for v>1.2.2
+    - patches/0002-disallow-float-for-diamatrix-values-1931.patch
 
 build:
   number: 0
