@@ -1,7 +1,7 @@
-From 7e923bbd89c83163537efc03a175726e66cbbb7e Mon Sep 17 00:00:00 2001
+From b8470fa7d8ac9c9796ac90b37c82a6cfc312fe89 Mon Sep 17 00:00:00 2001
 From: "H. Vetinari" <h.vetinari@gmx.com>
 Date: Sun, 29 Mar 2020 17:50:48 +0200
-Subject: [PATCH] remove pyproject.toml
+Subject: [PATCH 1/2] remove pyproject.toml
 
 ---
  pyproject.toml | 26 --------------------------
@@ -41,5 +41,5 @@ index 7597d42e0..000000000
 -    "wheel"
 -]
 -- 
-2.35.1.windows.2
+2.38.1.windows.1
 
