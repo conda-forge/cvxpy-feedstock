@@ -10,8 +10,6 @@ source:
   sha256: 21a794b6fd2f760a9d766d68fbe4946534f65e89b73e89b889c5503985558b86
   patches:
     - patches/0001-remove-pyproject.toml.patch
-    # backport cvxpy/cvxpy/1931 for compatibility with scipy 1.9; can be dropped for v>1.2.2
-    - patches/0002-disallow-float-for-diamatrix-values-1931.patch
 
 build:
   number: 0
