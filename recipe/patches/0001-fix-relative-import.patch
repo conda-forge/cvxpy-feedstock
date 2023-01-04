@@ -1,0 +1,25 @@
+From 81dcac9ed45a887e9b4b436d95ce1358438a1ddb Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Wed, 4 Jan 2023 15:17:01 +1100
+Subject: [PATCH] fix relative import
+
+---
+ cvxpy/tests/test_perspective.py | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cvxpy/tests/test_perspective.py b/cvxpy/tests/test_perspective.py
+index 957c0683b..3207ce190 100644
+--- a/cvxpy/tests/test_perspective.py
++++ b/cvxpy/tests/test_perspective.py
+@@ -20,7 +20,7 @@ import pytest
+ import cvxpy as cp
+ from cvxpy.constraints.exponential import ExpCone
+ 
+-from ..atoms.perspective import perspective
++from cvxpy.atoms.perspective import perspective
+ 
+ 
+ def test_monotonicity():
+-- 
+2.38.1.windows.1
+

@@ -8,6 +8,8 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 66cce67bdc635b9b29066510474392c0cfc0d95db8adda4010dc8cdd8e046250
+  patches:
+    - patches/0001-fix-relative-import.patch
 
 build:
   number: 0
