@@ -1,0 +1,32 @@
+From eded1ed71728208e72528edae09f500d5ed10108 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Wed, 4 Jan 2023 15:47:54 +1100
+Subject: [PATCH 2/2] do not use __builtins__ as dict
+
+---
+ cvxpy/atoms/affine/sum.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/cvxpy/atoms/affine/sum.py b/cvxpy/atoms/affine/sum.py
+index 380239af9..dfdba0ad4 100644
+--- a/cvxpy/atoms/affine/sum.py
++++ b/cvxpy/atoms/affine/sum.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++import builtins
+ from functools import wraps
+ from typing import List, Optional, Tuple
+ 
+@@ -109,6 +110,6 @@ def sum(expr, axis: Optional[int] = None, keepdims: bool = False):
+     """Wrapper for Sum class.
+     """
+     if isinstance(expr, list):
+-        return __builtins__['sum'](expr)
++        return builtins.sum(expr)
+     else:
+         return Sum(expr, axis, keepdims)
+-- 
+2.38.1.windows.1
+
