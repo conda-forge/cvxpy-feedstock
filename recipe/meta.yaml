@@ -90,7 +90,7 @@ outputs:
         - cvxpy.problems
         - cvxpy.reductions
         - cvxpy.reductions.complex2real
-        - cvxpy.reductions.complex2real.atom_canonicalizers
+        - cvxpy.reductions.complex2real.canonicalizers
         - cvxpy.reductions.dcp2cone
         - cvxpy.reductions.dcp2cone.atom_canonicalizers
         - cvxpy.reductions.eliminate_pwl
