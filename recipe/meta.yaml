@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.2.3" %}
+{% set version = "1.3.0" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 21a794b6fd2f760a9d766d68fbe4946534f65e89b73e89b889c5503985558b86
+  sha256: 66cce67bdc635b9b29066510474392c0cfc0d95db8adda4010dc8cdd8e046250
   patches:
     - patches/0001-remove-pyproject.toml.patch
 
