@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.2.3" %}
+{% set version = "1.3.0" %}
 
 package:
   name: cvxpy-split
@@ -7,9 +7,11 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 21a794b6fd2f760a9d766d68fbe4946534f65e89b73e89b889c5503985558b86
+  sha256: 66cce67bdc635b9b29066510474392c0cfc0d95db8adda4010dc8cdd8e046250
   patches:
-    - patches/0001-remove-pyproject.toml.patch
+    # backport https://github.com/cvxpy/cvxpy/pull/1998 (two patches)
+    - patches/0001-fix-relative-import.patch
+    - patches/0002-do-not-use-__builtins__-as-dict.patch
 
 build:
   number: 0
@@ -55,7 +57,10 @@ outputs:
 
   - name: cvxpy-base
     build:
-      script: {{ PYTHON }} -m pip install . --no-deps -vvv
+      script:
+        - rm $SRC_DIR/pyproject.toml    # [unix]
+        - del %SRC_DIR%\pyproject.toml  # [win]
+        - {{ PYTHON }} -m pip install . --no-deps -vvv
     requirements:
       build:
         - python                                 # [build_platform != target_platform]
@@ -74,37 +79,9 @@ outputs:
         - scipy >=1.1.0
     test:
       imports:
+        # public interface is defined (see #75) to be the content of
+        # https://github.com/cvxpy/cvxpy/blob/master/cvxpy/__init__.py
         - cvxpy
-        - cvxpy.atoms
-        - cvxpy.atoms.affine
-        - cvxpy.atoms.elementwise
-        - cvxpy.cvxcore
-        - cvxpy.cvxcore.python
-        - cvxpy.constraints
-        - cvxpy.expressions
-        - cvxpy.expressions.constants
-        - cvxpy.interface
-        - cvxpy.interface.numpy_interface
-        - cvxpy.lin_ops
-        - cvxpy.problems
-        - cvxpy.reductions
-        - cvxpy.reductions.complex2real
-        - cvxpy.reductions.complex2real.atom_canonicalizers
-        - cvxpy.reductions.dcp2cone
-        - cvxpy.reductions.dcp2cone.atom_canonicalizers
-        - cvxpy.reductions.eliminate_pwl
-        - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
-        - cvxpy.reductions.qp2quad_form
-        - cvxpy.reductions.qp2quad_form.atom_canonicalizers
-        - cvxpy.reductions.eliminate_pwl.atom_canonicalizers
-        - cvxpy.reductions.solvers
-        - cvxpy.reductions.solvers.conic_solvers
-        - cvxpy.reductions.solvers.qp_solvers
-        - cvxpy.reductions.solvers.lp_solvers
-        - cvxpy.tests
-        - cvxpy.transforms
-        - cvxpy.utilities
-        - cvxpy.cvxcore.python
 
 about:
   home: http://www.cvxpy.org/
