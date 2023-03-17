@@ -1,0 +1,1389 @@
+From 1807712a28794d0bcc59e481319b91b234093903 Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Sat, 18 Mar 2023 09:26:50 +1100
+Subject: [PATCH] squashed diff from 1.3.0 -> 1.3.1
+
+---
+ .github/workflows/build.yml                   |  64 ++++++---
+ README.md                                     |   4 +-
+ .../install_dependencies.sh                   |  13 +-
+ cvxpy/atoms/affine/binary_operators.py        |   2 +-
+ cvxpy/atoms/affine/sum.py                     |   3 +-
+ cvxpy/atoms/elementwise/power.py              |   5 +
+ cvxpy/constraints/constraint.py               |   4 +
+ cvxpy/reductions/cone2cone/affine2direct.py   |   1 +
+ cvxpy/reductions/dcp2cone/dcp2cone.py         |  16 ++-
+ .../dgp2dcp/atom_canonicalizers/__init__.py   |   4 +-
+ .../atom_canonicalizers/pnorm_canon.py        |   4 +-
+ .../solvers/conic_solvers/mosek_conif.py      | 120 +++++++++++++----
+ cvxpy/tests/test_atoms.py                     |   2 +-
+ cvxpy/tests/test_conic_solvers.py             |  82 +++++++++++-
+ cvxpy/tests/test_constant.py                  |  40 ++++++
+ cvxpy/tests/test_constant_atoms.py            |   6 +-
+ cvxpy/tests/test_copy.py                      | 122 ++++++++++++++++++
+ cvxpy/tests/test_dgp2dcp.py                   |  36 ++++++
+ cvxpy/tests/test_expressions.py               |  31 +++++
+ cvxpy/tests/test_perspective.py               |   3 +-
+ cvxpy/tests/test_problem.py                   |  26 ----
+ cvxpy/utilities/canonical.py                  |  49 ++++++-
+ cvxpy/utilities/key_utils.py                  |   5 +
+ cvxpy/utilities/linalg.py                     |  33 +++--
+ .../examples/derivatives/fundamentals.rst     |   2 +-
+ doc/source/faq/index.rst                      |  12 ++
+ doc/source/index.rst                          |   3 +-
+ doc/source/tutorial/advanced/index.rst        |  12 +-
+ doc/source/tutorial/functions/index.rst       |   2 +-
+ examples/notebooks/WWW/Gini Portfolio.ipynb   |   2 +-
+ .../notebooks/WWW/Kurtosis Portfolio.ipynb    |   2 +-
+ .../notebooks/derivatives/fundamentals.ipynb  |   2 +-
+ pyproject.toml                                |  11 +-
+ setup.cfg                                     |   2 +-
+ setup.py                                      |   6 +-
+ 35 files changed, 601 insertions(+), 130 deletions(-)
+ create mode 100644 cvxpy/tests/test_constant.py
+ create mode 100644 cvxpy/tests/test_copy.py
+
+diff --git a/.github/workflows/build.yml b/.github/workflows/build.yml
+index f1bf4516c..8204c45b1 100644
+--- a/.github/workflows/build.yml
++++ b/.github/workflows/build.yml
+@@ -5,17 +5,17 @@ on:
+     push:
+         branches:
+             - master
++            - 'release/**'
+         tags:
+           - '*'
+ 
++# https://docs.github.com/en/actions/using-jobs/using-concurrency#example-using-a-fallback-value
++# Only cancels-in-progress on PRs (head_ref only defined in PR, fallback run_id always unique)
++concurrency:
++  group: ${{ github.head_ref || github.run_id }}
++  cancel-in-progress: true
++
+ jobs:
+-  cleanup-runs:
+-    runs-on: ubuntu-latest
+-    steps:
+-    - uses: rokroskar/workflow-run-cleanup-action@master
+-      env:
+-        GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+-    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/master'"
+ 
+   linters:
+     runs-on: ubuntu-latest
+@@ -124,29 +124,41 @@ jobs:
+           echo "PYTHON_SUBVERSION=$(echo $PYTHON_VERSION | cut -c 3-)" >> $GITHUB_ENV
+           echo "DEPLOY=$( [[ $GITHUB_EVENT_NAME == 'push' && $GITHUB_REF == 'refs/tags'* ]] && echo 'True' || echo 'False' )" >> $GITHUB_ENV
+ 
++      - name: Set up QEMU  # For aarch64, see https://cibuildwheel.readthedocs.io/en/stable/faq/#emulation
++        if: runner.os == 'Linux'
++        uses: docker/setup-qemu-action@v2
++        with:
++          platforms: all
++
+       - name: Build wheels
+-        if: ${{env.DEPLOY == 'True' && env.USE_OPENMP != 'True'}}
++        if: ${{github.event_name == 'push' && env.USE_OPENMP != 'True'}}
+         env:
+           CIBW_BUILD: "cp3${{env.PYTHON_SUBVERSION}}-*"
+           CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux*"
+           CIBW_ARCHS_MACOS: x86_64 universal2
+-        uses: joerick/cibuildwheel@v2.11.2
++          CIBW_ARCHS_LINUX: auto aarch64
++        uses: pypa/cibuildwheel@v2.12.0
+ 
+       - name: Build source
+-        if: ${{env.DEPLOY == 'True' && env.SINGLE_ACTION_CONFIG == 'True'}}
++        if: ${{github.event_name == 'push' && env.SINGLE_ACTION_CONFIG == 'True'}}
+         run: |
+           python setup.py sdist --dist-dir=wheelhouse
+ 
+-      - name: Release to pypi
+-        if: ${{env.DEPLOY == 'True' &&  env.USE_OPENMP != 'True'}}
++      - name: Check wheels
++        if: ${{github.event_name == 'push' &&  env.USE_OPENMP != 'True'}}
+         shell: bash
+         run: |
+           python -m pip install --upgrade twine
+           twine check wheelhouse/*
++
++      - name:  Release to pypi
++        if: ${{env.DEPLOY == 'True' &&  env.USE_OPENMP != 'True'}}
++        shell: bash
++        run: |
+           twine upload --skip-existing --repository-url $PYPI_SERVER wheelhouse/* -u $PYPI_USER -p $PYPI_PASSWORD
+ 
+       - name: Upload artifacts to github
+-        if: ${{env.DEPLOY == 'True' && env.USE_OPENMP != 'True'}}
++        if: ${{github.event_name == 'push' && env.USE_OPENMP != 'True'}}
+         uses: actions/upload-artifact@v1
+         with:
+           name: wheels
+@@ -208,29 +220,41 @@ jobs:
+           pip install . pytest cplex
+           pytest cvxpy/tests/test_conic_solvers.py -k 'TestCPLEX'
+ 
++      - name: Set up QEMU  # For aarch64, see https://cibuildwheel.readthedocs.io/en/stable/faq/#emulation
++        if: runner.os == 'Linux'
++        uses: docker/setup-qemu-action@v2
++        with:
++          platforms: all
++
+       - name: Build wheels
+-        if: ${{env.DEPLOY == 'True'}}
++        if: ${{github.event_name == 'push'}}
+         env:
+           CIBW_BUILD: "cp3${{env.PYTHON_SUBVERSION}}-*"
+           CIBW_SKIP: "*-win32 *-manylinux_i686 *-musllinux*"
+           CIBW_ARCHS_MACOS: x86_64 universal2
+-        uses: joerick/cibuildwheel@v2.6.1
++          CIBW_ARCHS_LINUX: auto aarch64
++        uses: pypa/cibuildwheel@v2.12.0
+ 
+       - name: Build source
+-        if: ${{env.DEPLOY == 'True' && env.SINGLE_ACTION_CONFIG == 'True'}}
++        if: ${{github.event_name == 'push' && env.SINGLE_ACTION_CONFIG == 'True'}}
+         run: |
+           python setup.py sdist --dist-dir=wheelhouse
+ 
+-      - name: Release to pypi
++      - name: Check wheels
+         shell: bash
+-        if: ${{env.DEPLOY == 'True'}}
++        if: ${{github.event_name == 'push'}}
+         run: |
+           python -m pip install --upgrade twine
+           twine check wheelhouse/*
+-          twine upload --skip-existing --repository-url $PYPI_SERVER wheelhouse/* -u $PYPI_USER -p $PYPI_PASSWORD
+ 
+-      - name: Upload artifacts to github
++      - name: Release to pypi
++        shell: bash
+         if: ${{env.DEPLOY == 'True'}}
++        run: |
++          twine upload --skip-existing --repository-url $PYPI_SERVER wheelhouse/* -u $PYPI_USER -p $PYPI_BASE_PASSWORD
++
++      - name: Upload artifacts to github
++        if: ${{github.event_name == 'push'}}
+         uses: actions/upload-artifact@v1
+         with:
+           name: wheels-base
+diff --git a/README.md b/README.md
+index dff18566a..999486b5c 100644
+--- a/README.md
++++ b/README.md
+@@ -139,7 +139,9 @@ researchers and engineers.
+ 
+ CVXPY is developed and maintained by [Steven
+ Diamond](https://stevendiamond.me/), [Akshay
+-Agrawal](https://akshayagrawal.com), [Riley Murray](https://rileyjmurray.wordpress.com/), and [Bartolomeo Stellato](https://stellato.io/), with many others contributing
++Agrawal](https://akshayagrawal.com), [Riley Murray](https://rileyjmurray.wordpress.com/), 
++[Philipp Schiele](https://www.philippschiele.com/),
++and [Bartolomeo Stellato](https://stellato.io/), with many others contributing
+ significantly. A non-exhaustive list of people who have shaped CVXPY over the
+ years includes Stephen Boyd, Eric Chu, Robin Verschueren, Michael Sommerauer,
+ Jaehyun Park, Enzo Busseti, AJ Friend, Judson Wilson, Chris
+diff --git a/continuous_integration/install_dependencies.sh b/continuous_integration/install_dependencies.sh
+index bf0d4834b..bd57e0d07 100644
+--- a/continuous_integration/install_dependencies.sh
++++ b/continuous_integration/install_dependencies.sh
+@@ -10,20 +10,23 @@ conda config --set remote_max_retries 10
+ conda config --set remote_backoff_factor 2
+ conda config --set remote_read_timeout_secs 120.0
+ 
+-if [[ "$PYTHON_VERSION" == "3.7" ]] || [[ "$PYTHON_VERSION" == "3.8" ]]; then
+-  conda install scipy=1.3 numpy=1.16 mkl pip pytest pytest-cov lapack ecos scs osqp cvxopt proxsuite setuptools=63.4.2
++# Issue with installing setuptools > 65.5.1 through conda on mac with Python 3.7.
++if [[ "$PYTHON_VERSION" == "3.7" ]] && [[ "$RUNNER_OS" == "macos-11" ]]; then
++  conda install scipy=1.3 numpy=1.16 mkl pip pytest pytest-cov lapack ecos scs osqp cvxopt proxsuite setuptools
++elif [[ "$PYTHON_VERSION" == "3.7" ]] || [[ "$PYTHON_VERSION" == "3.8" ]]; then
++  conda install scipy=1.3 numpy=1.16 mkl pip pytest pytest-cov lapack ecos scs osqp cvxopt proxsuite "setuptools>65.5.1"
+ elif [[ "$PYTHON_VERSION" == "3.9" ]]; then
+   # The earliest version of numpy that works is 1.19.
+   # Given numpy 1.19, the earliest version of scipy we can use is 1.5.
+-  conda install scipy=1.5 numpy=1.19 mkl pip pytest lapack ecos scs osqp cvxopt proxsuite setuptools=64.0.2
++  conda install scipy=1.5 numpy=1.19 mkl pip pytest lapack ecos scs osqp cvxopt proxsuite "setuptools>65.5.1"
+ elif [[ "$PYTHON_VERSION" == "3.10" ]]; then
+     # The earliest version of numpy that works is 1.21.
+     # Given numpy 1.21, the earliest version of scipy we can use is 1.7.
+-    conda install scipy=1.7 numpy=1.21 mkl pip pytest lapack ecos scs osqp cvxopt proxsuite setuptools=64.0.2
++    conda install scipy=1.7 numpy=1.21 mkl pip pytest lapack ecos scs osqp cvxopt proxsuite "setuptools>65.5.1"
+ elif [[ "$PYTHON_VERSION" == "3.11" ]]; then
+     # The earliest version of numpy that works is 1.23.4.
+     # Given numpy 1.23.4, the earliest version of scipy we can use is 1.9.3.
+-    conda install scipy=1.9.3 numpy=1.23.4 mkl pip pytest lapack ecos scs cvxopt proxsuite "setuptools<65"
++    conda install scipy=1.9.3 numpy=1.23.4 mkl pip pytest lapack ecos scs cvxopt proxsuite "setuptools>65.5.1"
+ fi
+ 
+ 
+diff --git a/cvxpy/atoms/affine/binary_operators.py b/cvxpy/atoms/affine/binary_operators.py
+index f0e999385..568d026cb 100644
+--- a/cvxpy/atoms/affine/binary_operators.py
++++ b/cvxpy/atoms/affine/binary_operators.py
+@@ -108,7 +108,7 @@ class MulExpression(BinaryOperator):
+     def numeric(self, values):
+         """Matrix multiplication.
+         """
+-        if self.args[0].shape == () or self.args[1].shape == () or \
++        if values[0].shape == () or values[1].shape == () or \
+            intf.is_sparse(values[0]) or intf.is_sparse(values[1]):
+             return values[0] * values[1]
+         else:
+diff --git a/cvxpy/atoms/affine/sum.py b/cvxpy/atoms/affine/sum.py
+index 380239af9..dfdba0ad4 100644
+--- a/cvxpy/atoms/affine/sum.py
++++ b/cvxpy/atoms/affine/sum.py
+@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++import builtins
+ from functools import wraps
+ from typing import List, Optional, Tuple
+ 
+@@ -109,6 +110,6 @@ def sum(expr, axis: Optional[int] = None, keepdims: bool = False):
+     """Wrapper for Sum class.
+     """
+     if isinstance(expr, list):
+-        return __builtins__['sum'](expr)
++        return builtins.sum(expr)
+     else:
+         return Sum(expr, axis, keepdims)
+diff --git a/cvxpy/atoms/elementwise/power.py b/cvxpy/atoms/elementwise/power.py
+index 4da1e9add..76309250c 100644
+--- a/cvxpy/atoms/elementwise/power.py
++++ b/cvxpy/atoms/elementwise/power.py
+@@ -338,6 +338,11 @@ class power(Elementwise):
+         else:
+             return self.args[0].is_constant()
+ 
++    def _quadratic_power(self) -> bool:
++        """Utility function to check if power is 0, 1 or 2."""
++        p = self.p_rational
++        return p in [0, 1, 2]
++
+     def _grad(self, values):
+         """Gives the (sub/super)gradient of the atom w.r.t. each argument.
+ 
+diff --git a/cvxpy/constraints/constraint.py b/cvxpy/constraints/constraint.py
+index 6f6f45c3a..74aa127c9 100644
+--- a/cvxpy/constraints/constraint.py
++++ b/cvxpy/constraints/constraint.py
+@@ -195,6 +195,10 @@ class Constraint(u.Canonical):
+         """
+         return self.constr_id
+ 
++    @id.setter
++    def id(self, value):
++        self.constr_id = value
++
+     def get_data(self):
+         """Data needed to copy.
+         """
+diff --git a/cvxpy/reductions/cone2cone/affine2direct.py b/cvxpy/reductions/cone2cone/affine2direct.py
+index 4592466e7..425033e27 100644
+--- a/cvxpy/reductions/cone2cone/affine2direct.py
++++ b/cvxpy/reductions/cone2cone/affine2direct.py
+@@ -197,6 +197,7 @@ class Dualize:
+                 dv = direct_prims[DUAL_EXP][i:i + con.size]
+                 dual_vars[con.id] = dv
+                 i += con.size
++            i = 0
+             for con in constr_map[PowCone_obj]:
+                 dv = direct_prims[DUAL_POW3D][i:i + con.size]
+                 dual_vars[con.id] = dv
+diff --git a/cvxpy/reductions/dcp2cone/dcp2cone.py b/cvxpy/reductions/dcp2cone/dcp2cone.py
+index a43c74298..74c51bd6b 100644
+--- a/cvxpy/reductions/dcp2cone/dcp2cone.py
++++ b/cvxpy/reductions/dcp2cone/dcp2cone.py
+@@ -119,9 +119,15 @@ class Dcp2Cone(Canonicalization):
+         if isinstance(expr, Expression) and (
+                 expr.is_constant() and not expr.parameters()):
+             return expr, []
+-        elif self.quad_obj and affine_above and type(expr) in self.quad_canon_methods:
+-            return self.quad_canon_methods[type(expr)](expr, args)
+-        elif type(expr) in self.cone_canon_methods:
++
++        if self.quad_obj and affine_above and type(expr) in self.quad_canon_methods:
++            # Special case for power.
++            if type(expr) == cvxtypes.power() and not expr._quadratic_power():
++                return self.cone_canon_methods[type(expr)](expr, args)
++            else:
++                return self.quad_canon_methods[type(expr)](expr, args)
++
++        if type(expr) in self.cone_canon_methods:
+             return self.cone_canon_methods[type(expr)](expr, args)
+-        else:
+-            return expr.copy(args), []
++
++        return expr.copy(args), []
+diff --git a/cvxpy/reductions/dgp2dcp/atom_canonicalizers/__init__.py b/cvxpy/reductions/dgp2dcp/atom_canonicalizers/__init__.py
+index 4517df6fb..4c0f7093b 100644
+--- a/cvxpy/reductions/dgp2dcp/atom_canonicalizers/__init__.py
++++ b/cvxpy/reductions/dgp2dcp/atom_canonicalizers/__init__.py
+@@ -20,7 +20,7 @@ from cvxpy.atoms.norm1 import norm1
+ from cvxpy.atoms.norm_inf import norm_inf
+ from cvxpy.atoms.one_minus_pos import one_minus_pos
+ from cvxpy.atoms.pf_eigenvalue import pf_eigenvalue
+-from cvxpy.atoms.pnorm import pnorm
++from cvxpy.atoms.pnorm import Pnorm
+ from cvxpy.atoms.prod import Prod
+ from cvxpy.atoms.quad_form import quad_form
+ from cvxpy.atoms.quad_over_lin import quad_over_lin
+@@ -81,7 +81,7 @@ CANON_METHODS = {
+     norm_inf : norm_inf_canon,
+     one_minus_pos : one_minus_pos_canon,
+     pf_eigenvalue : pf_eigenvalue_canon,
+-    pnorm : pnorm_canon,
++    Pnorm : pnorm_canon,
+     power : power_canon, 
+     Prod : prod_canon,
+     quad_form : quad_form_canon,
+diff --git a/cvxpy/reductions/dgp2dcp/atom_canonicalizers/pnorm_canon.py b/cvxpy/reductions/dgp2dcp/atom_canonicalizers/pnorm_canon.py
+index a62ed0316..1232e0fc8 100644
+--- a/cvxpy/reductions/dgp2dcp/atom_canonicalizers/pnorm_canon.py
++++ b/cvxpy/reductions/dgp2dcp/atom_canonicalizers/pnorm_canon.py
+@@ -12,7 +12,7 @@ def pnorm_canon(expr, args):
+         x = promote(p, (1,))
+     if expr.axis is None or len(x.shape) == 1:
+         x = vec(x)
+-        return (1.0/p) * log_sum_exp(hstack([xi ** p for xi in x])), []
++        return (1.0/p) * log_sum_exp(hstack([xi * p for xi in x])), []
+ 
+     if expr.axis == 0:
+         x = x.T
+@@ -20,5 +20,5 @@ def pnorm_canon(expr, args):
+     rows = []
+     for i in range(x.shape[0]):
+         row = x[i]
+-        rows.append((1.0/p) * log_sum_exp(hstack([xi ** p for xi in row])))
++        rows.append((1.0/p) * log_sum_exp(hstack([xi * p for xi in row])))
+     return vstack(rows), []
+diff --git a/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py b/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
+index f5b5f4b32..a1efa2a03 100644
+--- a/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
++++ b/cvxpy/reductions/solvers/conic_solvers/mosek_conif.py
+@@ -13,7 +13,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ """
++from __future__ import annotations
+ 
++import warnings
+ from collections import defaultdict
+ 
+ import numpy as np
+@@ -27,6 +29,12 @@ from cvxpy.reductions.solution import Solution
+ from cvxpy.reductions.solvers.conic_solvers.conic_solver import ConicSolver
+ from cvxpy.reductions.solvers.utilities import expcone_permutor
+ 
++__MSK_ENUM_PARAM_DEPRECATION__ = """
++Using MOSEK constants to specify parameters is deprecated.
++Use generic string names instead.
++For example, replace mosek.iparam.num_threads with 'MSK_IPAR_NUM_THREADS'
++"""
++
+ 
+ def vectorized_lower_tri_to_mat(v, dim):
+     """
+@@ -42,14 +50,58 @@ def vectorized_lower_tri_to_mat(v, dim):
+     return A
+ 
+ 
+-def vectorized_lower_tri_to_triples(v, dim):
+-    rows, cols, vals = [], [], []
+-    running_idx = 0
+-    for j in range(dim):
+-        rows += [j + k for k in range(dim - j)]
+-        cols += [j] * (dim - j)
+-        vals.extend(v[running_idx:(running_idx + dim - j)])
+-        running_idx += dim - j
++def vectorized_lower_tri_to_triples(A: sp.sparse.coo_matrix | list[float] | np.ndarray, dim: int) \
++        -> tuple[list[int], list[int], list[float]]:
++    """
++    Attributes
++    ----------
++    A : scipy.sparse.coo_matrix | list[float] | np.ndarray
++        Contains the lower triangular entries of a symmetric matrix, flattened into a 1D array in
++        column-major order.
++    dim : int
++        The number of rows (equivalently, columns) in the original matrix.
++
++    Returns
++    -------
++    rows : list[int]
++        The row indices of the entries in the original matrix.
++    cols : list[int]
++        The column indices of the entries in the original matrix.
++    vals : list[float]
++        The values of the entries in the original matrix.
++    """
++
++    if isinstance(A, sp.sparse.coo_matrix):
++        vals = A.data
++        flattened_cols = A.col
++        # Ensure that the columns are sorted.
++        if not np.all(flattened_cols[:-1] < flattened_cols[1:]):
++            sort_idx = np.argsort(flattened_cols)
++            vals = vals[sort_idx]
++            flattened_cols = flattened_cols[sort_idx]
++    elif isinstance(A, list):
++        vals = A
++        flattened_cols = np.arange(len(A))
++    elif isinstance(A, np.ndarray):
++        vals = list(A)
++        flattened_cols = np.arange(len(A))
++    else:
++        raise TypeError(f"Expected A to be a coo_matrix, list, or ndarray, "
++                        f"but got {type(A)} instead.")
++
++    cum_cols = np.cumsum(np.arange(dim, 0, -1))
++    rows, cols = [], []
++    current_col = 0
++    for v in flattened_cols:
++        for c in range(current_col, dim):
++            if v < cum_cols[c]:
++                cols.append(c)
++                prev_row = 0 if c == 0 else cum_cols[c - 1]
++                rows.append(v - prev_row + c)
++                break
++            else:
++                current_col += 1
++
+     return rows, cols, vals
+ 
+ 
+@@ -161,18 +213,17 @@ class MOSEK(ConicSolver):
+             A_block = A_psd[:, idx:idx + vec_len]
+             # ^ each row specifies a linear operator on PSD variable.
+             for i in range(n):
++                # A_row defines a symmetric matrix by where the first "order" entries
++                #   gives the matrix's first column, the second "order-1" entries gives
++                #   the matrix's second column (diagonal and below), and so on.
+                 A_row = A_block[i, :]
+                 if A_row.nnz == 0:
+                     continue
+-                A_row = A_row.toarray().ravel()
+-                # A_row defines a symmetric matrix by where the first "order" entries
+-                #   gives the matrix's first column, the second "order-1" entries gives
+-                #   the matrix's second column (diagonal and blow), and so on.
+-                rows, cols, vals = vectorized_lower_tri_to_triples(A_row, dim)
+-                # TODO: replace the above function with something that only reads the nonzero
+-                #  entries. I.e. return *actual* sparse matrix data, rather than data for a dense
+-                #  matrix stated in a sparse format.
++
++                A_row_coo = A_row.tocoo()
++                rows, cols, vals = vectorized_lower_tri_to_triples(A_row_coo, dim)
+                 A_bar_data.append((i, j, (rows, cols, vals)))
++
+             c_block = c_psd[idx:idx + vec_len]
+             rows, cols, vals = vectorized_lower_tri_to_triples(c_block, dim)
+             c_bar_data.append((j, (rows, cols, vals)))
+@@ -225,6 +276,7 @@ class MOSEK(ConicSolver):
+             else:
+                 env = mosek.Env()
+                 task = env.Task(0, 0)
++                save_file = MOSEK.handle_options(env, task, verbose, solver_opts)
+                 task = MOSEK._build_dualized_task(task, data)
+         else:
+             if len(data[s.C]) == 0:
+@@ -233,10 +285,10 @@ class MOSEK(ConicSolver):
+             else:
+                 env = mosek.Env()
+                 task = env.Task(0, 0)
++                save_file = MOSEK.handle_options(env, task, verbose, solver_opts)
+                 task = MOSEK._build_slack_task(task, data)
+ 
+-        # Set parameters, optimize the Mosek Task, and return the result.
+-        save_file = MOSEK.handle_options(env, task, verbose, solver_opts)
++        # Optimize the Mosek Task, and return the result.
+         if save_file:
+             task.writedata(save_file)
+         task.optimize()
+@@ -544,7 +596,7 @@ class MOSEK(ConicSolver):
+         if verbose:
+ 
+             def streamprinter(text):
+-                s.LOGGER.info(text.replace('\n', ''))
++                s.LOGGER.info(text.rstrip('\n'))
+ 
+             print('\n')
+             env.set_Stream(mosek.streamtype.log, streamprinter)
+@@ -556,18 +608,34 @@ class MOSEK(ConicSolver):
+         save_file = None
+         bfs = False
+         if 'mosek_params' in kwargs:
++            # Issue a warning if Mosek enums are used as parameter names / keys
++            if any(isinstance(param, mosek.iparam) or
++                   isinstance(param, mosek.dparam) or
++                   isinstance(param, mosek.sparam) for param in solver_opts['mosek_params'].keys()):
++                warnings.warn(__MSK_ENUM_PARAM_DEPRECATION__, DeprecationWarning)
++                warnings.warn(__MSK_ENUM_PARAM_DEPRECATION__, UserWarning)
++            # Now set parameters
+             for param, value in solver_opts['mosek_params'].items():
+                 if isinstance(param, str):
++                    # Parameters are set through generic string names (recommended)
+                     param = param.strip()
+-                    if param.startswith("MSK_DPAR_"):
+-                        task.putnadouparam(param, value)
+-                    elif param.startswith("MSK_IPAR_"):
+-                        task.putnaintparam(param, value)
+-                    elif param.startswith("MSK_SPAR_"):
+-                        task.putnastrparam(param, value)
++                    if isinstance(value, str):
++                        # The value is also a string.
++                        # Examples: "MSK_IPAR_INTPNT_SOLVE_FORM": "MSK_SOLVE_DUAL"
++                        #           "MSK_DPAR_CO_TOL_PFEAS": "1.0e-9"
++                        task.putparam(param, value)
+                     else:
+-                        raise ValueError("Invalid MOSEK parameter '%s'." % param)
++                        # Otherwise we assume the value is of correct type
++                        if param.startswith("MSK_DPAR_"):
++                            task.putnadouparam(param, value)
++                        elif param.startswith("MSK_IPAR_"):
++                            task.putnaintparam(param, value)
++                        elif param.startswith("MSK_SPAR_"):
++                            task.putnastrparam(param, value)
++                        else:
++                            raise ValueError("Invalid MOSEK parameter '%s'." % param)
+                 else:
++                    # Parameters are set through Mosek enums (deprecated)
+                     if isinstance(param, mosek.dparam):
+                         task.putdouparam(param, value)
+                     elif isinstance(param, mosek.iparam):
+diff --git a/cvxpy/tests/test_atoms.py b/cvxpy/tests/test_atoms.py
+index e8b855ed4..60ebe64ca 100644
+--- a/cvxpy/tests/test_atoms.py
++++ b/cvxpy/tests/test_atoms.py
+@@ -1422,7 +1422,7 @@ class TestAtoms(BaseTest):
+             cp.trace(X) == 1
+         ]
+         prob = cp.Problem(cp.Minimize(cp.tr_inv(X)), constraints)
+-        prob.solve(verbose=True)
++        prob.solve()
+         # Check result. The best value is T^2.
+         self.assertAlmostEqual(prob.value, T**2)
+         X_actual = X.value
+diff --git a/cvxpy/tests/test_conic_solvers.py b/cvxpy/tests/test_conic_solvers.py
+index a8b48f536..38653609b 100644
+--- a/cvxpy/tests/test_conic_solvers.py
++++ b/cvxpy/tests/test_conic_solvers.py
+@@ -20,6 +20,7 @@ import unittest
+ import numpy as np
+ import pytest
+ import scipy.linalg as la
++import scipy.stats as st
+ 
+ import cvxpy as cp
+ import cvxpy.tests.solver_test_helpers as sths
+@@ -350,6 +351,25 @@ class TestSCS(BaseTest):
+             data = prob.get_problem_data(solver=cp.SCS)
+             assert "P" not in data[0]
+ 
++    def test_quad_obj_with_power(self) -> None:
++        """Test a mixed quadratic/power objective.
++        """
++        # Only relevant for SCS >= 3.0.0.
++        import scs
++        if Version(scs.__version__) >= Version('3.0.0'):
++            # See https://github.com/cvxpy/cvxpy/issues/2059
++            x = cp.Variable()
++            prob = cp.Problem(cp.Minimize(x**1.6 + x**2), [x >= 1])
++            prob.solve(solver=cp.SCS, use_quad_obj=True)
++            self.assertAlmostEqual(prob.value, 2)
++            self.assertAlmostEqual(x.value, 1)
++
++            # Check problem data.
++            data = prob.get_problem_data(solver=cp.SCS, solver_opts={"use_quad_obj": True})
++            # Quadratic objective and SOC contraints.
++            assert "P" in data[0]
++            assert data[0]["dims"].soc
++
+     def test_scs_lp_3(self) -> None:
+         StandardTestLPs.test_lp_3(solver='SCS')
+ 
+@@ -562,9 +582,9 @@ class TestMosek(unittest.TestCase):
+             problem = cp.Problem(objective, constraints)
+ 
+             invalid_mosek_params = {
+-                "dparam.basis_tol_x": "1e-8"
++                "MSK_IPAR_NUM_THREADS": "11.3"
+             }
+-            with self.assertRaises(ValueError):
++            with self.assertRaises(mosek.Error):
+                 problem.solve(solver=cp.MOSEK, mosek_params=invalid_mosek_params)
+ 
+             with self.assertRaises(ValueError):
+@@ -572,9 +592,63 @@ class TestMosek(unittest.TestCase):
+ 
+             mosek_params = {
+                 mosek.dparam.basis_tol_x: 1e-8,
+-                "MSK_IPAR_INTPNT_MAX_ITERATIONS": 20
++                "MSK_IPAR_INTPNT_MAX_ITERATIONS": 20,
++                "MSK_IPAR_NUM_THREADS": "17",
++                "MSK_IPAR_PRESOLVE_USE": "MSK_PRESOLVE_MODE_OFF",
++                "MSK_DPAR_INTPNT_CO_TOL_DFEAS": 1e-9,
++                "MSK_DPAR_INTPNT_CO_TOL_PFEAS": "1e-9"
+             }
+-            problem.solve(solver=cp.MOSEK, mosek_params=mosek_params)
++            with pytest.warns():
++                problem.solve(solver=cp.MOSEK, mosek_params=mosek_params)
++
++    def test_power_portfolio(self) -> None:
++        """Test the portfolio problem in issue #2042"""
++        T, N = 200, 10
++
++        rs = np.random.RandomState(123)
++        mean = np.zeros(N) + 1/1000
++        cov = rs.rand(N, N) * 1.5 - 0.5
++        cov = cov @ cov.T/1000 + np.diag(rs.rand(N) * 0.7 + 0.3)/1000
++
++        Y = st.multivariate_normal.rvs(
++            mean=mean,
++            cov=cov,
++            size=T,
++            random_state=rs
++        )
++
++        w = cp.Variable((N, 1))
++        t = cp.Variable((1, 1))
++        z = cp.Variable((1, 1))
++        omega = cp.Variable((T, 1))
++        psi = cp.Variable((T, 1))
++        nu = cp.Variable((T, 1))
++        epsilon = cp.Variable((T, 1))
++        k = cp.Variable((1, 1))
++        b = np.ones((1, N))/N
++
++        X = Y @ w
++
++        h = 0.2
++        ones = np.ones((T, 1))
++        constraints = [
++            cp.constraints.power.PowCone3D(z * (1+h)/(2*h) * ones, psi * (1+h)/h, epsilon, 1/(1+h)),
++            cp.constraints.power.PowCone3D(omega/(1-h), nu/h, -z/(2*h) * ones, (1-h)),
++            -X - t + epsilon + omega <= 0,
++            w >= 0,
++            z >= 0,
++            ]
++
++        obj = t + z + cp.sum(psi + nu)
++
++        constraints += [cp.sum(w) == k,
++                        k >= 0,
++                        b @ cp.log(w) >= 1,
++                        ]
++        objective = cp.Minimize(obj)
++        prob = cp.Problem(objective, constraints)
++        prob.solve(solver=cp.MOSEK)
++        assert prob.status is cp.OPTIMAL
+ 
+ 
+ @unittest.skipUnless('CVXOPT' in INSTALLED_SOLVERS, 'CVXOPT is not installed.')
+diff --git a/cvxpy/tests/test_constant.py b/cvxpy/tests/test_constant.py
+new file mode 100644
+index 000000000..077f55231
+--- /dev/null
++++ b/cvxpy/tests/test_constant.py
+@@ -0,0 +1,40 @@
++import numpy as np
++import scipy.sparse.linalg as sparla
++
++import cvxpy as cp
++from cvxpy import psd_wrap
++
++
++def test_is_psd() -> None:
++
++    n = 50
++
++    # trivial cases
++    psd = np.eye(n)
++    nsd = -np.eye(n)
++
++    assert cp.Constant(psd).is_psd()
++    assert not cp.Constant(psd).is_nsd()
++
++    assert cp.Constant(nsd).is_nsd()
++    assert not cp.Constant(nsd).is_psd()
++
++    # We simulate a scenario where a matrix is PSD but a ArpackNoConvergence is raised.
++    # With the current numpy random number generator, this happens with seed 97.
++    # We test a range of seeds to make sure that this scenario is not always triggered.
++
++    failures = set()
++    for seed in range(95, 100):
++        np.random.seed(seed)
++
++        P = np.random.randn(n, n)
++        P = P.T @ P
++
++        try:
++            cp.Constant(P).is_psd()
++        except sparla.ArpackNoConvergence as e:
++            assert "CVXPY note" in str(e)
++            failures.add(seed)
++    assert failures == {97}
++
++    assert psd_wrap(cp.Constant(P)).is_psd()
+diff --git a/cvxpy/tests/test_constant_atoms.py b/cvxpy/tests/test_constant_atoms.py
+index 56d91186d..9941033c7 100644
+--- a/cvxpy/tests/test_constant_atoms.py
++++ b/cvxpy/tests/test_constant_atoms.py
+@@ -58,8 +58,8 @@ def log_sum_exp_axis_1(x): return cp.log_sum_exp(x, axis=1)  # noqa E371
+ 
+ 
+ # map from solver name to a list of strings for atoms that fail.
++#   old example: KNOWN_SOLVER_ERRORS[cp.MOSEK] = ['xexp']
+ KNOWN_SOLVER_ERRORS = collections.defaultdict(list)
+-KNOWN_SOLVER_ERRORS[cp.MOSEK] = ['xexp']
+ 
+ atoms_minimize = [
+     (cp.abs, (2, 2), [[[-5, 2], [-3, 1]]],
+@@ -76,8 +76,8 @@ atoms_minimize = [
+     (cp.diag, (2, 2), [[-5, 1]], Constant([[-5, 0], [0, 1]])),
+     (cp.exp, (2, 2), [[[1, 0], [2, -1]]],
+      Constant([[math.e, 1], [math.e**2, 1.0 / math.e]])),
+-    (lambda x: cp.xexp(cp.pos(x)), (2, 2), [[[1, 0], [2, .5]]],
+-     Constant([[math.e, 0], [2 * math.e**2, 0.5 * math.e**.5]])),
++    (lambda x: cp.xexp(cp.pos(x)), (2, 2), [[[1, 3], [2, .5]]],
++     Constant([[math.e, 3 * math.e**3], [2 * math.e**2, 0.5 * math.e**.5]])),
+     (cp.huber, (2, 2), [[[0.5, -1.5], [4, 0]]],
+      Constant([[0.25, 2], [7, 0]])),
+     (lambda x: cp.huber(x, 2.5), (2, 2), [[[0.5, -1.5], [4, 0]]],
+diff --git a/cvxpy/tests/test_copy.py b/cvxpy/tests/test_copy.py
+new file mode 100644
+index 000000000..60226b585
+--- /dev/null
++++ b/cvxpy/tests/test_copy.py
+@@ -0,0 +1,122 @@
++"""
++Copyright, the CVXPY authors
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
++"""
++
++import copy
++
++import numpy as np
++
++import cvxpy as cp
++from cvxpy.constraints import Equality
++
++
++def test_leaf():
++    a = cp.Variable()
++    b = copy.copy(a)
++    c = copy.deepcopy(a)
++
++    assert a.id == b.id
++    assert a.id != c.id
++
++    assert id(a) == id(b)
++    assert id(a) != id(c)
++
++
++def test_constraint():
++    x = cp.Variable()
++
++    a = Equality(x, 0)
++    b = copy.copy(a)
++    c = copy.deepcopy(a)
++
++    assert a.id == b.id
++    assert a.id != c.id
++
++    assert id(a) != id(b)
++    assert id(a) != id(c)
++    assert id(b) != id(c)
++
++
++def test_expression():
++    x = cp.Variable()
++
++    a = x + 1
++    b = copy.copy(a)
++    c = copy.deepcopy(a)
++
++    assert a.id != b.id
++    assert a.id != c.id
++
++    assert id(a) != id(b)
++    assert id(a) != id(c)
++    assert id(b) != id(c)
++
++
++def test_problem():
++    x = cp.Variable()
++    y = cp.Variable()
++    obj = cp.Minimize((x + y) ** 2)
++    constraints = [x + y == 1]
++    prob = cp.Problem(obj, constraints)
++    prob_copy = copy.copy(prob)
++    prob_deepcopy = copy.deepcopy(prob)
++
++    assert id(prob) != id(prob_copy)
++    assert id(prob) != id(prob_deepcopy)
++    assert id(prob_copy) != id(prob_deepcopy)
++
++    prob.solve()
++    assert prob.status == cp.OPTIMAL
++
++    prob_copy.solve()
++    assert prob_copy.status == cp.OPTIMAL
++
++    prob_deepcopy.solve()
++    assert prob_deepcopy.status == cp.OPTIMAL
++
++
++def test_constraints_in_problem():
++
++    x = cp.Variable(name='x', nonneg=True)
++    y = cp.Variable(name='y', nonneg=True)
++
++    original_constraints = [
++        x + y == 1
++    ]
++    shallow_constraints = copy.copy(original_constraints)
++
++    obj = cp.Maximize((x + 2 * y))
++    prob = cp.Problem(obj, shallow_constraints)
++    prob.solve()
++    assert prob.status == cp.OPTIMAL
++    assert np.allclose(x.value, 0)
++    assert np.allclose(y.value, 1)
++
++    deep_constraints = copy.deepcopy(original_constraints)
++    prob = cp.Problem(obj, deep_constraints)
++    prob.solve()
++    # The constraints refer to the original variables, so the problem is unbounded
++    assert prob.status == cp.UNBOUNDED
++
++    x_copied = deep_constraints[0].variables()[0]
++    y_copied = deep_constraints[0].variables()[1]
++
++    deep_obj = cp.Maximize((x_copied + 2 * y_copied))
++    prob = cp.Problem(deep_obj, deep_constraints)
++    prob.solve()
++    # Can get back the same solution by using copied variables
++    assert prob.status == cp.OPTIMAL
++    assert np.allclose(x_copied.value, 0)
++    assert np.allclose(y_copied.value, 1)
+diff --git a/cvxpy/tests/test_dgp2dcp.py b/cvxpy/tests/test_dgp2dcp.py
+index f0e948158..f880b4693 100644
+--- a/cvxpy/tests/test_dgp2dcp.py
++++ b/cvxpy/tests/test_dgp2dcp.py
+@@ -621,3 +621,39 @@ class TestDgp2Dcp(BaseTest):
+                              [x >= b])
+         prob.solve(solver=SOLVER, gp=True)
+         self.assertItemsAlmostEqual(expr.value, [np.e, 0.5 * np.e**.5])
++
++    def test_pnorm(self) -> None:
++        x = cvxpy.Variable(pos=True)
++        p = cvxpy.Problem(cvxpy.Minimize(cvxpy.norm(cvxpy.Constant([3, 4]), p=2) * x ** 2),
++                          [x >= 1])
++        self.assertAlmostEqual(p.solve(gp=True), 5)
++        self.assertAlmostEqual(p.solution.opt_val, 5)
++        self.assertAlmostEqual(x.value, 1.0)
++
++        # Test p = 3
++        x = cvxpy.Variable(pos=True)
++        arr = [1.5, 3, 2]
++        l3_norm = np.linalg.norm(arr, 3)
++        p = cvxpy.Problem(cvxpy.Minimize(cvxpy.norm(cvxpy.Constant(arr), p=3) * x ** 2),
++                          [x >= 1])
++        self.assertAlmostEqual(p.solve(gp=True), l3_norm)
++        self.assertAlmostEqual(p.solution.opt_val, l3_norm)
++        self.assertAlmostEqual(x.value, 1.0)
++
++        # Test fro norm
++        x = cvxpy.Variable(pos=True)
++        mat = [[1, 0.5], [2, 3]]
++        l2_norm = np.linalg.norm(mat, 'fro')
++        p = cvxpy.Problem(cvxpy.Minimize(cvxpy.norm(cvxpy.Constant(mat), p='fro') * x ** 2),
++                          [x >= 1])
++        self.assertAlmostEqual(p.solve(gp=True), l2_norm)
++        self.assertAlmostEqual(p.solution.opt_val, l2_norm)
++        self.assertAlmostEqual(x.value, 1.0)
++
++        # Test on a variable
++        x = cvxpy.Variable(2, pos=True)
++        c = cvxpy.Constant([3, 4])
++        p = cvxpy.Problem(cvxpy.Minimize(cvxpy.norm(c, p=2)), [x == c])
++        self.assertAlmostEqual(p.solve(gp=True), 5)
++        self.assertAlmostEqual(p.solution.opt_val, 5)
++        self.assertItemsAlmostEqual(x.value, c.value)
+diff --git a/cvxpy/tests/test_expressions.py b/cvxpy/tests/test_expressions.py
+index ec48686ec..d450de849 100644
+--- a/cvxpy/tests/test_expressions.py
++++ b/cvxpy/tests/test_expressions.py
+@@ -1047,6 +1047,24 @@ class TestExpressions(BaseTest):
+         exp = self.C[:, -199:-3]
+         self.assertEqual(exp.shape, (3, 0))
+ 
++    def test_float_is_invalid_index(self) -> None:
++        with self.assertRaises(IndexError) as cm:
++            self.x[1.0]
++        self.assertEqual(str(cm.exception), "float is an invalid index type.")
++
++        with self.assertRaises(IndexError) as cm:
++            self.x[(1.0,)]
++        self.assertEqual(str(cm.exception), "float is an invalid index type.")
++
++        with self.assertRaises(IndexError) as cm:
++            self.C[: 2.:40]
++        self.assertEqual(str(cm.exception), "float is an invalid index type.")
++
++        with self.assertRaises(IndexError) as cm:
++            self.x[np.array([1.0, 2.0])]
++        self.assertEqual(str(cm.exception),
++                         "arrays used as indices must be of integer (or boolean) type")
++
+     def test_neg_indices(self) -> None:
+         """Test negative indices.
+         """
+@@ -1429,3 +1447,16 @@ class TestExpressions(BaseTest):
+         M = Variable(shape=(2, 2))
+         expr = x.T.__matmul__(M).__matmul__(x)
+         assert not isinstance(expr, cp.QuadForm)
++
++    def test_matmul_scalars(self) -> None:
++        """Test evaluating a matmul that reduces one argument internally to a scalar.
++
++        See https://github.com/cvxpy/cvxpy/issues/2065
++        """
++        x = cp.Variable((2,))
++        quad = cp.quad_form(x, np.eye(2))
++        a = np.array([2])
++        # NOTE quad has dimensions (1, 1) which is a bug.
++        expr = a @ quad
++        x.value = np.array([1, 2])
++        self.assertAlmostEqual(expr.value, 10)
+diff --git a/cvxpy/tests/test_perspective.py b/cvxpy/tests/test_perspective.py
+index 957c0683b..e7d841008 100644
+--- a/cvxpy/tests/test_perspective.py
++++ b/cvxpy/tests/test_perspective.py
+@@ -18,10 +18,9 @@ import numpy as np
+ import pytest
+ 
+ import cvxpy as cp
++from cvxpy.atoms.perspective import perspective
+ from cvxpy.constraints.exponential import ExpCone
+ 
+-from ..atoms.perspective import perspective
+-
+ 
+ def test_monotonicity():
+     x = cp.Variable(nonneg=True)
+diff --git a/cvxpy/tests/test_problem.py b/cvxpy/tests/test_problem.py
+index c3e5b5dd5..c6d48e243 100644
+--- a/cvxpy/tests/test_problem.py
++++ b/cvxpy/tests/test_problem.py
+@@ -15,7 +15,6 @@ limitations under the License.
+ """
+ 
+ import builtins
+-import copy
+ import pickle
+ import sys
+ import warnings
+@@ -25,7 +24,6 @@ from io import StringIO
+ import ecos
+ import numpy
+ import numpy as np
+-import pytest
+ import scipy.sparse as sp
+ # Solvers.
+ import scs
+@@ -2061,27 +2059,3 @@ class TestProblem(BaseTest):
+             c = cp.sum(a)
+             cp.Problem(cp.Maximize(0), [c >= 0])
+             assert len(w) == 0
+-
+-    def test_copy_constraints(self) -> None:
+-        """Test copy and deepcopy of constraints.
+-        """
+-        x = cp.Variable()
+-        y = cp.Variable()
+-
+-        constraints = [
+-            x + y == 1,
+-            x - y >= 1
+-        ]
+-        constraints[0].atoms()
+-        constraints = copy.copy(constraints)
+-
+-        obj = cp.Minimize((x - y) ** 2)
+-        prob = cp.Problem(obj, constraints)
+-        prob.solve()
+-        assert prob.status == cp.OPTIMAL
+-        assert np.allclose(x.value, 1)
+-        assert np.allclose(y.value, 0)
+-
+-        error_msg = "Creating a deepcopy of a CVXPY expression is not supported"
+-        with pytest.raises(NotImplementedError, match=error_msg):
+-            copy.deepcopy(constraints)
+diff --git a/cvxpy/utilities/canonical.py b/cvxpy/utilities/canonical.py
+index a331f6523..1ca66e66b 100644
+--- a/cvxpy/utilities/canonical.py
++++ b/cvxpy/utilities/canonical.py
+@@ -15,7 +15,9 @@ limitations under the License.
+ """
+ 
+ import abc
++import copy
+ 
++import cvxpy.lin_ops.lin_utils as lu
+ from cvxpy.utilities import performance_utils as pu
+ from cvxpy.utilities.deterministic import unique_list
+ 
+@@ -103,15 +105,35 @@ class Canonical:
+     def __copy__(self):
+         """
+         Called by copy.copy()
++        Creates a shallow copy of the object, that is, the copied object refers to the same
++        leaf nodes as the original object. Non-leaf nodes are recreated.
++        Constraints keep their .id attribute, as it is used to propagate dual variables.
++
++        Summary:
++        ========
++        Leafs:              Same object
++        Constraints:        New object with same .id
++        Other expressions:  New object with new .id
+         """
+         return self.copy()
+ 
+     def __deepcopy__(self, memo):
+         """
+         Called by copy.deepcopy()
++        Creates an independent copy of the object while maintaining the relationship between the
++        nodes in the expression tree.
+         """
+-        raise NotImplementedError('Creating a deepcopy of a CVXPY expression is not supported. '
+-                                  'Use .copy() instead.')
++        cvxpy_id = getattr(self, 'id', None)
++        if cvxpy_id is not None and cvxpy_id in memo:
++            return memo[cvxpy_id]
++        else:
++            with DefaultDeepCopyContextManager(self):  # Avoid infinite recursion
++                new = copy.deepcopy(self, memo)
++            if getattr(self, 'id', None) is not None:
++                new_id = lu.get_id()
++                new.id = new_id
++            memo[cvxpy_id] = new
++            return new
+ 
+     def get_data(self) -> None:
+         """Returns info needed to reconstruct the object besides the args.
+@@ -131,3 +153,26 @@ class Canonical:
+         """
+         # Remove duplicates.
+         return unique_list(atom for arg in self.args for atom in arg.atoms())
++
++
++_MISSING = object()
++
++
++class DefaultDeepCopyContextManager:
++    """
++    override custom __deepcopy__ implementation and call copy.deepcopy's implementation instead
++    """
++
++    def __init__(self, item):
++        self.item = item
++        self.deepcopy = None
++
++    def __enter__(self):
++        self.deepcopy = getattr(self.item, '__deepcopy__', _MISSING)
++        if self.deepcopy is not _MISSING:
++            self.item.__deepcopy__ = None
++
++    def __exit__(self, exc_type, exc_val, exc_tb):
++        if self.deepcopy is not _MISSING:
++            self.item.__deepcopy__ = self.deepcopy
++            self.deepcopy = _MISSING
+diff --git a/cvxpy/utilities/key_utils.py b/cvxpy/utilities/key_utils.py
+index 8202910db..60524ebe5 100644
+--- a/cvxpy/utilities/key_utils.py
++++ b/cvxpy/utilities/key_utils.py
+@@ -40,6 +40,11 @@ def validate_key(key, shape: Tuple[int, ...]):
+         Error: Index/slice out of bounds.
+     """
+     key = to_tuple(key)
++    if any(isinstance(k, float) or (isinstance(k, slice) and (
++            isinstance(k.start, float) or
++            isinstance(k.stop, float) or
++            isinstance(k.step, float))) for k in key):
++        raise IndexError("float is an invalid index type.")
+     if len(key) == 0:
+         raise IndexError("An index cannot be empty.")
+     # Change single indices for vectors into double indices.
+diff --git a/cvxpy/utilities/linalg.py b/cvxpy/utilities/linalg.py
+index 3481f8e1c..59b4427c0 100644
+--- a/cvxpy/utilities/linalg.py
++++ b/cvxpy/utilities/linalg.py
+@@ -51,7 +51,7 @@ def is_psd_within_tol(A, tol):
+ 
+     Parameters
+     ----------
+-    A : Union[np.ndarray, spar.spmatrx]
++    A : Union[np.ndarray, spar.spmatrix]
+         Symmetric (or Hermitian) NumPy ndarray or SciPy sparse matrix.
+ 
+     tol : float
+@@ -76,15 +76,30 @@ def is_psd_within_tol(A, tol):
+         # a negative eigenvalue of A. If A - sigma*I is PSD, then we obviously
+         # have that the smallest eigenvalue of A is >= sigma.
+ 
+-    ev = np.NaN
+     try:
+         ev = SA_eigsh(-tol)  # might return np.NaN, or raise exception
+-    finally:
+-        if np.isnan(ev).all():
+-            # will be NaN if A has an eigenvalue which is exactly -tol
+-            # (We might also hit this code block for other reasons.)
+-            temp = tol - np.finfo(A.dtype).eps
+-            ev = SA_eigsh(-temp)
++    except sparla.ArpackNoConvergence as e:
++        # This is a numerical issue. We can't certify that A is PSD.
++
++        message = """
++        CVXPY note: This failure was encountered while trying to certify
++        that a matrix is positive semi-definite (see [1] for a definition).
++        In rare cases, this method fails for numerical reasons even when the matrix is
++        positive semi-definite. If you know that you're in that situation, you can
++        replace the matrix A by cvxpy.psd_wrap(A).
++
++        [1] https://en.wikipedia.org/wiki/Definite_matrix
++        """
++
++        error_with_note = f"{str(e)}\n\n{message}"
++
++        raise sparla.ArpackNoConvergence(error_with_note, e.eigenvalues, e.eigenvectors)
++
++    if np.isnan(ev).any():
++        # will be NaN if A has an eigenvalue which is exactly -tol
++        # (We might also hit this code block for other reasons.)
++        temp = tol - np.finfo(A.dtype).eps
++        ev = SA_eigsh(-temp)
+ 
+     return np.all(ev >= -tol)
+ 
+@@ -101,7 +116,7 @@ def gershgorin_psd_check(A, tol):
+ 
+     Parameters
+     ----------
+-    A : Union[np.ndarray, spar.spmatrx]
++    A : Union[np.ndarray, spar.spmatrix]
+         Symmetric (or Hermitian) NumPy ndarray or SciPy sparse matrix.
+ 
+     tol : float
+diff --git a/doc/source/examples/derivatives/fundamentals.rst b/doc/source/examples/derivatives/fundamentals.rst
+index 0cd8b0f8f..4952c6633 100644
+--- a/doc/source/examples/derivatives/fundamentals.rst
++++ b/doc/source/examples/derivatives/fundamentals.rst
+@@ -4,7 +4,7 @@ Derivatives fundamentals
+ 
+ This notebook will introduce you to the fundamentals of computing the
+ derivative of the solution map to optimization problems. The derivative
+-can be used for **sensitvity analysis**, to see how a solution would
++can be used for **sensitivity analysis**, to see how a solution would
+ change given small changes to the parameters, and to compute
+ **gradients** of scalar-valued functions of the solution.
+ 
+diff --git a/doc/source/faq/index.rst b/doc/source/faq/index.rst
+index 614621a20..9164fe88f 100644
+--- a/doc/source/faq/index.rst
++++ b/doc/source/faq/index.rst
+@@ -96,6 +96,18 @@ How do I create variables with more than 2 dimensions?
+ You must mimic the extra dimensions using a dict,
+ as described in `this Github issue <https://github.com/cvxpy/cvxpy/issues/198>`__.
+ 
++Can I copy CVXPY expressions?
++-----------------------------
++Yes, CVXPY supports shallow and deep copying using the ``copy`` and ``deepcopy`` functions from the ``copy`` module.
++
++A (shallow) copy refers to the same leaf nodes (Variables, Constants, and Parameters) as the original object.
++Non-leaf nodes are recreated. Constraints keep their ``.id`` attribute, as it is used to propagate dual variables.
++
++A deepcopy creates an independent copy of the object while maintaining the relationship between the
++nodes in the expression tree.
++
++
++
+ Why does it take so long to compile my Problem?
+ -----------------------------------------------
+ In general, you should vectorize CVXPY expressions whenever possible if you
+diff --git a/doc/source/index.rst b/doc/source/index.rst
+index c006e6354..ce5ffe60f 100644
+--- a/doc/source/index.rst
++++ b/doc/source/index.rst
+@@ -80,7 +80,8 @@ researchers and engineers.
+ CVXPY is developed and maintained by
+ `Steven Diamond <https://stevendiamond.me/>`_,
+ `Akshay Agrawal <https://akshayagrawal.com>`_,
+-`Riley Murray <https://rileyjmurray.wordpress.com/>`_, and
++`Riley Murray <https://rileyjmurray.wordpress.com/>`_,
++`Philipp Schiele <https://www.philippschiele.com/>`_, and
+ `Bartolomeo Stellato <https://stellato.io/>`_ with many others contributing
+ significantly. A non-exhaustive list of people who have shaped CVXPY over the
+ years includes Stephen Boyd, Eric Chu, Robin Verschueren,
+diff --git a/doc/source/tutorial/advanced/index.rst b/doc/source/tutorial/advanced/index.rst
+index 8096b50be..232f75cd4 100644
+--- a/doc/source/tutorial/advanced/index.rst
++++ b/doc/source/tutorial/advanced/index.rst
+@@ -816,11 +816,11 @@ For others see `OSQP documentation <https://osqp.org/docs/interfaces/solver_sett
+ `MOSEK`_ options:
+ 
+ ``'mosek_params'``
+-    A dictionary of MOSEK parameters. Refer to MOSEK's Python or C API for
+-    details. Note that if parameters are given as string-value pairs, parameter
+-    names must be of the form ``'MSK_DPAR_BASIS_TOL_X'`` as in the C API.
+-    Alternatively, Python enum options like ``'mosek.dparam.basis_tol_x'`` are
+-    also supported.
++    A dictionary of MOSEK parameters in the form ``name: value``. Parameter names
++    should be strings, as in the MOSEK C API or command line, for example
++    ``'MSK_DPAR_BASIS_TOL_X'``, ``'MSK_IPAR_NUM_THREADS'`` etc. Values are strings,
++    integers or floats, depending on the parameter.
++    See `example <https://docs.mosek.com/latest/faq/faq.html#cvxpy>`_.
+ 
+ ``'save_file'``
+     The name of a file where MOSEK will save the problem just before optimization.
+@@ -841,7 +841,7 @@ For others see `OSQP documentation <https://osqp.org/docs/interfaces/solver_sett
+     MOSEK interface. If you notice MOSEK solve times are slower for some of your
+     problems under CVXPY 1.1.6 or higher, be sure to use the MOSEK solver options
+     to tell MOSEK that it should solve the dual; this can be accomplished by
+-    adding the ``(key, value)`` pair ``(mosek.iparam.intpnt_solve_form, mosek.solveform.dual)``
++    adding the ``(key, value)`` pair ``('MSK_IPAR_INTPNT_SOLVE_FORM', 'MSK_SOLVE_DUAL')``
+     to the ``mosek_params`` argument.
+     
+ `CVXOPT`_ options:
+diff --git a/doc/source/tutorial/functions/index.rst b/doc/source/tutorial/functions/index.rst
+index a2c5c9b4f..1e248c864 100644
+--- a/doc/source/tutorial/functions/index.rst
++++ b/doc/source/tutorial/functions/index.rst
+@@ -419,7 +419,7 @@ and returns a scalar.
+      - |convex| convex
+      - None
+ 
+-   * - :ref:`tv(x) <tv>`
++   * - :ref:`tv(X) <tv>`
+      - :math:`\sum_{ij}\left\| \left[\begin{matrix} X_{i+1,j} - X_{ij} \\ X_{i,j+1} -X_{ij} \end{matrix}\right] \right\|_2`
+      - :math:`X \in \mathbf{R}^{m \times n}`
+      - |positive| positive
+diff --git a/examples/notebooks/WWW/Gini Portfolio.ipynb b/examples/notebooks/WWW/Gini Portfolio.ipynb
+index 8b78dbc2f..827e2a1e5 100644
+--- a/examples/notebooks/WWW/Gini Portfolio.ipynb	
++++ b/examples/notebooks/WWW/Gini Portfolio.ipynb	
+@@ -175,7 +175,7 @@
+     "\n",
+     "    try:\n",
+     "        prob.solve(solver=cp.MOSEK,\n",
+-    "                   mosek_params={mosek.iparam.num_threads: 2},\n",
++    "                   mosek_params={'MSK_IPAR_NUM_THREADS': 2},\n",
+     "                   verbose=False,)\n",
+     "        w = pd.DataFrame(w.value)\n",
+     "        w.index = assets\n",
+diff --git a/examples/notebooks/WWW/Kurtosis Portfolio.ipynb b/examples/notebooks/WWW/Kurtosis Portfolio.ipynb
+index cde91ee89..fe857eb4d 100644
+--- a/examples/notebooks/WWW/Kurtosis Portfolio.ipynb	
++++ b/examples/notebooks/WWW/Kurtosis Portfolio.ipynb	
+@@ -466,7 +466,7 @@
+     "obj = cp.Minimize(risk * 1000)\n",
+     "prob = cp.Problem(obj, constraints)\n",
+     "\n",
+-    "#prob.solve(solver='MOSEK', mosek_params= {mosek.iparam.num_threads: 2})\n",
++    "#prob.solve(solver='MOSEK', mosek_params= {'MSK_IPAR_NUM_THREADS': 2})\n",
+     "prob.solve()\n",
+     "w = pd.DataFrame(x.value, index=assets, columns=['weights'])\n",
+     "display(w)"
+diff --git a/examples/notebooks/derivatives/fundamentals.ipynb b/examples/notebooks/derivatives/fundamentals.ipynb
+index 3c483f637..04842c0d3 100644
+--- a/examples/notebooks/derivatives/fundamentals.ipynb
++++ b/examples/notebooks/derivatives/fundamentals.ipynb
+@@ -6,7 +6,7 @@
+    "source": [
+     "# Derivatives fundamentals\n",
+     "\n",
+-    "This notebook will introduce you to the fundamentals of computing the derivative of the solution map to optimization problems. The derivative can be used for **sensitvity analysis**, to see how a solution would change given small changes to the parameters, and to compute **gradients** of scalar-valued functions of the solution.\n",
++    "This notebook will introduce you to the fundamentals of computing the derivative of the solution map to optimization problems. The derivative can be used for **sensitivity analysis**, to see how a solution would change given small changes to the parameters, and to compute **gradients** of scalar-valued functions of the solution.\n",
+     "\n",
+     "In this notebook, we will consider a simple disciplined geometric program. The geometric program under consideration is\n",
+     "\n",
+diff --git a/pyproject.toml b/pyproject.toml
+index 4439210fc..a19d6410c 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -14,14 +14,17 @@ testpaths = [
+ 
+ [build-system]
+ requires = [
+-    "numpy>=1.15,<1.16; python_version=='3.7'",
+-    "numpy>=1.16,<1.17; python_version=='3.8'",
+-    "numpy>=1.19,<1.20; python_version=='3.9' and (platform_machine!='arm64' or platform_system!='Darwin')",
++    "numpy>=1.15,<1.16; python_version=='3.7' and platform_machine!='aarch64'",
++    "numpy>=1.19.2,<1.20; python_version=='3.7' and platform_machine=='aarch64'",
++    "numpy>=1.17,<1.18; python_version=='3.8' and platform_machine!='aarch64'",
++    "numpy>=1.19.2,<1.20; python_version=='3.8' and platform_machine=='aarch64'",
++    "numpy>=1.19,<1.20; python_version=='3.9' and (platform_machine not in 'arm64|aarch64' or platform_system!='Darwin')",
++    "numpy>=1.19.2,<1.20; python_version=='3.9' and platform_machine=='aarch64'",
+     "numpy>=1.21.4,<1.22; python_version=='3.9' and (platform_machine=='arm64' and platform_system=='Darwin')",
+     "numpy>=1.21,<1.22; python_version=='3.10' and (platform_machine!='arm64' or platform_system!='Darwin')",
+     "numpy>=1.21.4,<1.22; python_version=='3.10' and (platform_machine=='arm64' and platform_system=='Darwin')",
+     "numpy>=1.23.4,<1.24; python_version=='3.11'",
+     "scipy >= 1.1.0",
+-    "setuptools>=40.8.0,<=64.0.2",
++    "setuptools>65.5.1",
+     "wheel"
+ ]
+diff --git a/setup.cfg b/setup.cfg
+index ee1c13090..c8ce0e8ca 100644
+--- a/setup.cfg
++++ b/setup.cfg
+@@ -17,7 +17,7 @@ PDLP = ortools>=9.3,<9.5
+ PROXQP = proxsuite
+ SCIP = PySCIPOpt
+ SCIPY = scipy
+-SCS = setuptools<64.0.2
++SCS = setuptools>65.5.1
+ XPRESS = xpress
+ 
+ [flake8]
+diff --git a/setup.py b/setup.py
+index 6ba1761a4..85b646d06 100644
+--- a/setup.py
++++ b/setup.py
+@@ -26,8 +26,8 @@ from setuptools.command.build_ext import build_ext
+ 
+ MAJOR = 1
+ MINOR = 3
+-MICRO = 0
+-IS_RELEASED = True
++MICRO = 1
++IS_RELEASED = False
+ IS_RELEASE_BRANCH = True
+ VERSION = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
+ 
+@@ -231,7 +231,7 @@ setup(
+         "scs >= 1.1.6",
+         "numpy >= 1.15",
+         "scipy >= 1.1.0",
+-        "setuptools <= 64.0.2",
++        "setuptools > 65.5.1",
+     ],
+     setup_requires=["numpy >= 1.15"],
+ )
+-- 
+2.38.1.windows.1
+
