@@ -6,8 +6,8 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 66cce67bdc635b9b29066510474392c0cfc0d95db8adda4010dc8cdd8e046250
+  url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 1103fd3ca90bab37639df6c58d90bb32f714fa4222aabb334b24a99f8d1f5377
   patches:
     # backport https://github.com/cvxpy/cvxpy/pull/1998 (two patches)
     - patches/0001-fix-relative-import.patch
