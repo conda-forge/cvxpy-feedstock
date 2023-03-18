@@ -8,10 +8,6 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: f07bfe93677a755a8554c4fda622ef01e2247ace99b3a78107aa9070e0d0a3cb
-  patches:
-    # backport https://github.com/cvxpy/cvxpy/pull/1998 (two patches)
-    - patches/0001-fix-relative-import.patch
-    - patches/0002-do-not-use-__builtins__-as-dict.patch
 
 build:
   number: 0
