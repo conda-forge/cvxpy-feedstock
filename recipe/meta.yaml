@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.3.0" %}
+{% set version = "1.3.1" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 66cce67bdc635b9b29066510474392c0cfc0d95db8adda4010dc8cdd8e046250
+  sha256: f07bfe93677a755a8554c4fda622ef01e2247ace99b3a78107aa9070e0d0a3cb
   patches:
     # backport https://github.com/cvxpy/cvxpy/pull/1998 (two patches)
     - patches/0001-fix-relative-import.patch
