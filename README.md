@@ -1,11 +1,11 @@
-About cvxpy
-===========
+About cvxpy-feedstock
+=====================
+
+Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cvxpy-feedstock/blob/main/LICENSE.txt)
 
 Home: http://www.cvxpy.org/
 
 Package license: Apache-2.0
-
-Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cvxpy-feedstock/blob/main/LICENSE.txt)
 
 Summary: A Python-embedded modeling language for convex optimization problems
 
