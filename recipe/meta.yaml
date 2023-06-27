@@ -47,10 +47,7 @@ outputs:
         - cvxpy.cvxcore
         - cvxpy.cvxcore.python
       commands:
-        {% set tests_to_skip = "_not_a_real_test" %}
-        # test sets intentionally too small timelimit, and then fails
-        {% set tests_to_skip = tests_to_skip + " or test_scipy_mi_time_limit_reached " %}   # [aarch64 or ppc64le]
-        - pytest cvxpy/tests -v -k "not ({{ tests_to_skip }})"
+        - pytest cvxpy/tests -v
 
   - name: cvxpy-base
     build:
