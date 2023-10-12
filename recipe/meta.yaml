@@ -33,9 +33,10 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('cvxpy-base', exact=True) }}
-        - osqp >=0.4.1
+        - osqp >=0.6.2
+        - clarabel >=0.5
         - ecos >=2
-        - scs >=1.1.6
+        - scs >=3.0
     test:
       requires:
         - pytest
@@ -64,6 +65,7 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
+        - pybind11
         # conda-forge recipe inserts oldest numpy per platform/runtime
         - numpy
         - pip
