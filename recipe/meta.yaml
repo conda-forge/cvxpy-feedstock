@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.3.2" %}
+{% set version = "1.4.0" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 0b685e5040f199f3d703f30f5d22d1f865597623455153d1ddd770245aef0975
+  sha256: fbc6ec7c5a414aa5945eb188b4e71a500662eb3a4f8f4a18baf432a1d986e714
 
 build:
   number: 0
@@ -33,9 +33,10 @@ outputs:
       run:
         - python
         - {{ pin_subpackage('cvxpy-base', exact=True) }}
-        - osqp >=0.4.1
+        - osqp >=0.6.2
+        - clarabel >=0.5
         - ecos >=2
-        - scs >=1.1.6
+        - scs >=3.0
     test:
       requires:
         - pytest
@@ -47,10 +48,7 @@ outputs:
         - cvxpy.cvxcore
         - cvxpy.cvxcore.python
       commands:
-        {% set tests_to_skip = "_not_a_real_test" %}
-        # test sets intentionally too small timelimit, and then fails
-        {% set tests_to_skip = tests_to_skip + " or test_scipy_mi_time_limit_reached " %}   # [aarch64 or ppc64le]
-        - pytest cvxpy/tests -v -k "not ({{ tests_to_skip }})"
+        - pytest cvxpy/tests -v
 
   - name: cvxpy-base
     build:
@@ -67,6 +65,7 @@ outputs:
         - {{ compiler('cxx') }}
       host:
         - python
+        - pybind11
         # conda-forge recipe inserts oldest numpy per platform/runtime
         - numpy
         - pip
