@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.4.1" %}
+{% set version = "1.4.2" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 7a9ef34e3c57ff8c844d86f0a3834fb5575af19233947639de0ba577c6122e3e
+  sha256: 0a386a5788dbd78b7b20dd071524ec636c8fa72b3628e69f1abc714c8f9811e5
 
 build:
   number: 0
