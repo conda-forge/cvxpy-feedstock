@@ -9,6 +9,10 @@ source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 0a386a5788dbd78b7b20dd071524ec636c8fa72b3628e69f1abc714c8f9811e5
   patches:
+    # Skipping this test because of broken test with Scipy≥1.12
+    # https://github.com/cvxpy/cvxpy/pull/2343/files
+    # https://github.com/cvxpy/cvxpy/issues/2341
+    # TODO: Remove this patch after cvxpy 1.4.3 release
     - skip-huber-test.patch
 
 build:
