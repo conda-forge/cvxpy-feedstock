@@ -8,8 +8,6 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 0a386a5788dbd78b7b20dd071524ec636c8fa72b3628e69f1abc714c8f9811e5
-  patches:
-    - skip-test_all_solvers.patch
 
 build:
   number: 1
@@ -74,7 +72,10 @@ outputs:
       run:
         - python
         - {{ pin_compatible('numpy') }}
-        - scipy >=1.1.0
+        - scipy >=1.1.0  # [py<39]
+        # Pinning because of https://github.com/cvxpy/cvxpy/issues/2341
+        # Remove once 1.4.3 is released
+        - scipy >=1.1.0,<1.12  # [py>=39]
     test:
       imports:
         # public interface is defined (see #75) to be the content of
