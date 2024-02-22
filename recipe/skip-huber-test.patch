@@ -1,0 +1,16 @@
+diff --git a/cvxpy/tests/test_qp_solvers.py b/cvxpy/tests/test_qp_solvers.py
+index aaa28e7ef..5986da198 100644
+--- a/cvxpy/tests/test_qp_solvers.py
++++ b/cvxpy/tests/test_qp_solvers.py
+@@ -102,7 +102,10 @@ class TestQp(BaseTest):
+             self.sparse_system(solver)
+             self.smooth_ridge(solver)
+             self.huber_small(solver)
+-            self.huber(solver)
++            # Skipping this test because of broken test with Scipy≥1.12
++            # https://github.com/cvxpy/cvxpy/pull/2343/files
++            # https://github.com/cvxpy/cvxpy/issues/2341
++            # self.huber(solver)
+             self.equivalent_forms_1(solver)
+             self.equivalent_forms_2(solver)
+             self.equivalent_forms_3(solver)
