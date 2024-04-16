@@ -1,5 +1,5 @@
 {% set name = "cvxpy" %}
-{% set version = "1.4.2" %}
+{% set version = "1.4.3" %}
 
 package:
   name: cvxpy-split
@@ -7,13 +7,13 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 0a386a5788dbd78b7b20dd071524ec636c8fa72b3628e69f1abc714c8f9811e5
+  sha256: b1b078c8c05923ad128e7d814b0be1c337ac05262a78b757a8e6f957648ad953
   patches:
     # backport https://github.com/cvxpy/cvxpy/pull/2343
     - patches/0001-Hardcode-data-2343.patch
 
 build:
-  number: 1
+  number: 0
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
