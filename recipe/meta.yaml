@@ -8,9 +8,6 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: b1b078c8c05923ad128e7d814b0be1c337ac05262a78b757a8e6f957648ad953
-  patches:
-    # backport https://github.com/cvxpy/cvxpy/pull/2343
-    - patches/0001-Hardcode-data-2343.patch
 
 build:
   number: 0
