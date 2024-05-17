@@ -13,7 +13,7 @@ source:
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 0
+  number: 1
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
@@ -80,7 +80,6 @@ outputs:
         - pip
       run:
         - python
-        - {{ pin_compatible('numpy') }}
         - scipy >=1.1.0
     test:
       imports:
