@@ -40,6 +40,7 @@ outputs:
         - scs >=3.0
     test:
       requires:
+        - pip
         - pytest
         - cvxopt
       source_files:
@@ -50,6 +51,9 @@ outputs:
         - cvxpy.cvxcore.python
       commands:
         - pytest cvxpy/tests -v
+        # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
+        # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
+        - if [ 0 -eq $(pip list | grep "UNKNOWN" | wc -l) ]; then exit 0; else (pip list && exit 1); fi  # [unix]
 
   - name: cvxpy-base
     build:
