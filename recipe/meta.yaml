@@ -40,6 +40,7 @@ outputs:
         - scs >=3.0
     test:
       requires:
+        - pip
         - pytest
         - cvxopt
       source_files:
