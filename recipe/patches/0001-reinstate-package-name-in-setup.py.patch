@@ -1,0 +1,26 @@
+From 8f98a4ab4815b8af3768e2206cd98fa8552bcf8c Mon Sep 17 00:00:00 2001
+From: "H. Vetinari" <h.vetinari@gmx.com>
+Date: Thu, 23 May 2024 23:19:50 +1100
+Subject: [PATCH] reinstate package name in setup.py
+
+In https://github.com/cvxpy/cvxpy/commit/d8f74ec152e4ca4b7381d339e9de0004df89beee
+the package name migrated to pyproject.toml, however we delete that file during
+the build because the [build-system] table messes with our installation process
+(and it's cumbersome to patch due to frequent conflicts on version updates);
+adding the name is necessary to avoid https://github.com/cvxpy/cvxpy/issues/2447
+---
+ setup.py | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/setup.py b/setup.py
+index 79e27c38f..46718fd33 100644
+--- a/setup.py
++++ b/setup.py
+@@ -55,6 +55,7 @@ VERSION = setup_versioning.VERSION
+ extensions = [setup_extensions.cvxcore, setup_extensions.sparsecholesky]
+ 
+ setup(
++    name="cvxpy",
+     version=str(VERSION),
+     cmdclass={'build_ext': build_ext_cvxpy},
+     ext_modules=extensions if "PYODIDE" not in os.environ else [],
