@@ -8,9 +8,12 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 225c90abe61a143dde2ff72d1acf9875b58d8c047ad589abc1b735640735dbfc
+  patches:
+    # avoid https://github.com/cvxpy/cvxpy/issues/2447
+    - patches/0001-reinstate-package-name-in-setup.py.patch
 
 build:
-  number: 0
+  number: 1
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
@@ -40,6 +43,7 @@ outputs:
         - scs >=3.0
     test:
       requires:
+        - pip
         - pytest
         - cvxopt
       source_files:
@@ -50,6 +54,9 @@ outputs:
         - cvxpy.cvxcore.python
       commands:
         - pytest cvxpy/tests -v
+        # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
+        # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
+        - if [ 0 -eq $(pip list | grep "UNKNOWN" | wc -l) ]; then exit 0; else (pip list && exit 1); fi  # [unix]
 
   - name: cvxpy-base
     build:
