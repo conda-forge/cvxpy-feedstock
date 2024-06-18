@@ -8,9 +8,6 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 8231f006f6b55da141758282aecb788b3b5742448765dba6a9440b6336080ce3
-  patches:
-    # avoid https://github.com/cvxpy/cvxpy/issues/2447
-    - patches/0001-reinstate-package-name-in-setup.py.patch
 
 build:
   number: 0
