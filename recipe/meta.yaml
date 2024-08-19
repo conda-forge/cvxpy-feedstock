@@ -1,19 +1,19 @@
 {% set name = "cvxpy" %}
-{% set version = "1.5.2" %}
+{% set version = "1.5.3" %}
 
 package:
   name: cvxpy-split
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 8231f006f6b55da141758282aecb788b3b5742448765dba6a9440b6336080ce3
+  url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 049c5882be7f81732e473e388a0fa2198e84596d0ce9f5f7cf121265e775add3
   patches:
     # test that fails due to timing issues on slow CI agents when in emulation
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 1
+  number: 0
 
 # Need these up here for conda-smithy to handle them properly.
 requirements:
