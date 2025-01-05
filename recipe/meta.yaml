@@ -49,7 +49,7 @@ outputs:
       script:
         - rm $SRC_DIR/pyproject.toml    # [unix]
         - del %SRC_DIR%\pyproject.toml  # [win]
-        - {{ PYTHON }} -m pip install . --no-deps -vvv
+        - python -m pip install . --no-deps -vvv
     requirements:
       build:
         - python                                 # [build_platform != target_platform]
