@@ -1,4 +1,3 @@
-{% set name = "cvxpy" %}
 {% set version = "1.5.3" %}
 
 package:
@@ -13,21 +12,9 @@ source:
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 0
-
-# Need these up here for conda-smithy to handle them properly.
-requirements:
-  build:
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
-    - {{ compiler('c') }}
-    - {{ stdlib("c") }}
-    - {{ compiler('cxx') }}
-  host:
-    - python
-  run:
-    - python
+  number: 1
+  # TODO: unskip; segfaults in test suite
+  skip: true  # [osx]
 
 outputs:
   - name: cvxpy
@@ -46,6 +33,8 @@ outputs:
         - pip
         - pytest
         - cvxopt
+        # cvxopt appears to have issues with newer scipy
+        - scipy <1.15
       source_files:
         - cvxpy/tests
       imports:
@@ -63,7 +52,7 @@ outputs:
       script:
         - rm $SRC_DIR/pyproject.toml    # [unix]
         - del %SRC_DIR%\pyproject.toml  # [win]
-        - {{ PYTHON }} -m pip install . --no-deps -vvv
+        - python -m pip install . --no-deps -vvv
     requirements:
       build:
         - python                                 # [build_platform != target_platform]
@@ -78,6 +67,7 @@ outputs:
         # conda-forge recipe inserts oldest numpy per platform/runtime
         - numpy
         - pip
+        - setuptools
       run:
         - python
         - scipy >=1.1.0
