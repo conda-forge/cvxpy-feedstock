@@ -15,20 +15,6 @@ source:
 build:
   number: 1
 
-# Need these up here for conda-smithy to handle them properly.
-requirements:
-  build:
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
-    - {{ compiler('c') }}
-    - {{ stdlib("c") }}
-    - {{ compiler('cxx') }}
-  host:
-    - python
-  run:
-    - python
-
 outputs:
   - name: cvxpy
     requirements:
