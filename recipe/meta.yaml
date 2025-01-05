@@ -78,6 +78,7 @@ outputs:
         # conda-forge recipe inserts oldest numpy per platform/runtime
         - numpy
         - pip
+        - setuptools
       run:
         - python
         - scipy >=1.1.0
