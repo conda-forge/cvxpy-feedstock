@@ -31,6 +31,8 @@ outputs:
         - pip
         - pytest
         - cvxopt
+        # cvxopt appears to have issues with newer scipy
+        - scipy <1.15
       source_files:
         - cvxpy/tests
       imports:
