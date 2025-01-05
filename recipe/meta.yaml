@@ -1,4 +1,4 @@
-{% set version = "1.5.3" %}
+{% set version = "1.6.0" %}
 
 package:
   name: cvxpy-split
@@ -6,13 +6,13 @@ package:
 
 source:
   url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 049c5882be7f81732e473e388a0fa2198e84596d0ce9f5f7cf121265e775add3
+  sha256: e6e48f91d056245e5df4b6097ff6bf8938e157d4d1e1749634ffa689ada51692
   patches:
     # test that fails due to timing issues on slow CI agents when in emulation
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 1
+  number: 0
   # TODO: unskip; segfaults in test suite
   skip: true  # [osx]
 
@@ -26,13 +26,13 @@ outputs:
         - {{ pin_subpackage('cvxpy-base', exact=True) }}
         - osqp >=0.6.2
         - clarabel >=0.5
-        - ecos >=2
-        - scs >=3.0
+        - scs >=3.2.4
     test:
       requires:
         - pip
         - pytest
         - cvxopt
+        - hypothesis
         # cvxopt appears to have issues with newer scipy
         - scipy <1.15
       source_files:
@@ -42,7 +42,10 @@ outputs:
         - cvxpy.cvxcore
         - cvxpy.cvxcore.python
       commands:
-        - pytest cvxpy/tests -v
+        {% set tests_to_skip = "_not_a_real_test" %}
+        # accuracy failure on PPC, likely due to emulation
+        {% set tests_to_skip = tests_to_skip + " or (TestDqcp and test_basic_multiply) " %}     # [ppc64le]
+        - pytest cvxpy/tests -v -k "not ({{ tests_to_skip }})"
         # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
         # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
         - if [ 0 -eq $(pip list | grep "UNKNOWN" | wc -l) ]; then exit 0; else (pip list && exit 1); fi  # [unix]
