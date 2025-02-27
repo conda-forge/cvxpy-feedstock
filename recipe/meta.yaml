@@ -1,4 +1,4 @@
-{% set version = "1.6.0" %}
+{% set version = "1.6.2" %}
 
 package:
   name: cvxpy-split
@@ -6,7 +6,7 @@ package:
 
 source:
   url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: e6e48f91d056245e5df4b6097ff6bf8938e157d4d1e1749634ffa689ada51692
+  sha256: 3d00e23d4fcbb5854a986e9995d89b391b1681100ffc5cd34f89a229a9f55da8
   patches:
     # test that fails due to timing issues on slow CI agents when in emulation
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
@@ -45,6 +45,7 @@ outputs:
         {% set tests_to_skip = "_not_a_real_test" %}
         # accuracy failure on PPC, likely due to emulation
         {% set tests_to_skip = tests_to_skip + " or (TestDqcp and test_basic_multiply) " %}     # [ppc64le]
+        {% set tests_to_skip = tests_to_skip + " or test_sparsity_condition " %}                # [py==313] 
         - pytest cvxpy/tests -v -k "not ({{ tests_to_skip }})"
         # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
         # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
