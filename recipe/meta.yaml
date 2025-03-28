@@ -13,8 +13,8 @@ source:
 
 build:
   number: 0
-  # TODO: unskip; segfaults in test suite
-  skip: true  # [osx]
+  # debugging segfaults in test suite
+  skip: true  # [not osx]
 
 outputs:
   - name: cvxpy
