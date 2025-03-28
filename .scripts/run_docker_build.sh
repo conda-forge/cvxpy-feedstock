@@ -7,24 +7,24 @@
 
 source .scripts/logging_utils.sh
 
-( startgroup "Configure Docker" ) 2> /dev/null
+(startgroup "Configure Docker") 2>/dev/null
 
 set -xeo pipefail
 
-THISDIR="$( cd "$( dirname "$0" )" >/dev/null && pwd )"
+THISDIR="$(cd "$(dirname "$0")" >/dev/null && pwd)"
 PROVIDER_DIR="$(basename $THISDIR)"
 
-FEEDSTOCK_ROOT="$( cd "$( dirname "$0" )/.." >/dev/null && pwd )"
+FEEDSTOCK_ROOT="$(cd "$(dirname "$0")/.." >/dev/null && pwd)"
 RECIPE_ROOT="${FEEDSTOCK_ROOT}/recipe"
 
-if [ -z ${FEEDSTOCK_NAME} ]; then
+if [ -z "${FEEDSTOCK_NAME}" ]; then
     export FEEDSTOCK_NAME=$(basename ${FEEDSTOCK_ROOT})
 fi
 
 if [[ "${sha:-}" == "" ]]; then
-  pushd "${FEEDSTOCK_ROOT}"
-  sha=$(git rev-parse HEAD)
-  popd
+    pushd "${FEEDSTOCK_ROOT}"
+    sha=$(git rev-parse HEAD)
+    popd
 fi
 
 docker info
@@ -35,7 +35,7 @@ docker info
 export HOST_USER_ID=$(id -u)
 # Check if docker-machine is being used (normally on OSX) and get the uid from
 # the VM
-if hash docker-machine 2> /dev/null && docker-machine active > /dev/null; then
+if hash docker-machine 2>/dev/null && docker-machine active >/dev/null; then
     export HOST_USER_ID=$(docker-machine ssh $(docker-machine active) id -u)
 fi
 
@@ -43,10 +43,10 @@ ARTIFACTS="$FEEDSTOCK_ROOT/build_artifacts"
 
 if [ -z "$CONFIG" ]; then
     set +x
-    FILES=`ls .ci_support/linux_*`
+    FILES=$(ls .ci_support/linux_*)
     CONFIGS=""
     for file in $FILES; do
-        CONFIGS="${CONFIGS}'${file:12:-5}' or ";
+        CONFIGS="${CONFIGS}'${file:12:-5}' or "
     done
     echo "Need to set CONFIG env variable. Value can be one of ${CONFIGS:0:-4}"
     exit 1
@@ -62,7 +62,7 @@ if [ -z "${DOCKER_IMAGE}" ]; then
             DOCKER_IMAGE="quay.io/condaforge/linux-anvil-comp7"
         fi
     else
-        DOCKER_IMAGE="$(cat "${FEEDSTOCK_ROOT}/.ci_support/${CONFIG}.yaml" | shyaml get-value docker_image.0 quay.io/condaforge/linux-anvil-comp7 )"
+        DOCKER_IMAGE="$(cat "${FEEDSTOCK_ROOT}/.ci_support/${CONFIG}.yaml" | shyaml get-value docker_image.0 quay.io/condaforge/linux-anvil-comp7)"
     fi
 fi
 
@@ -76,39 +76,39 @@ if [ -z "${CI}" ]; then
     DOCKER_RUN_ARGS="-it ${DOCKER_RUN_ARGS}"
 fi
 
-( endgroup "Configure Docker" ) 2> /dev/null
+(endgroup "Configure Docker") 2>/dev/null
 
-( startgroup "Start Docker" ) 2> /dev/null
+(startgroup "Start Docker") 2>/dev/null
 
 export UPLOAD_PACKAGES="${UPLOAD_PACKAGES:-True}"
 export IS_PR_BUILD="${IS_PR_BUILD:-False}"
 docker pull "${DOCKER_IMAGE}"
-docker run ${DOCKER_RUN_ARGS} \
-           -v "${RECIPE_ROOT}":/home/conda/recipe_root:rw,z,delegated \
-           -v "${FEEDSTOCK_ROOT}":/home/conda/feedstock_root:rw,z,delegated \
-           -e CONFIG \
-           -e HOST_USER_ID \
-           -e UPLOAD_PACKAGES \
-           -e IS_PR_BUILD \
-           -e GIT_BRANCH \
-           -e UPLOAD_ON_BRANCH \
-           -e CI \
-           -e FEEDSTOCK_NAME \
-           -e CPU_COUNT \
-           -e BUILD_WITH_CONDA_DEBUG \
-           -e BUILD_OUTPUT_ID \
-           -e flow_run_id \
-           -e remote_url \
-           -e sha \
-           -e BINSTAR_TOKEN \
-           -e FEEDSTOCK_TOKEN \
-           -e STAGING_BINSTAR_TOKEN \
-           "${DOCKER_IMAGE}" \
-           bash \
-           "/home/conda/feedstock_root/${PROVIDER_DIR}/build_steps.sh"
+docker run "${DOCKER_RUN_ARGS}" \
+    -v "${RECIPE_ROOT}":/home/conda/recipe_root:rw,z,delegated \
+    -v "${FEEDSTOCK_ROOT}":/home/conda/feedstock_root:rw,z,delegated \
+    -e CONFIG \
+    -e HOST_USER_ID \
+    -e UPLOAD_PACKAGES \
+    -e IS_PR_BUILD \
+    -e GIT_BRANCH \
+    -e UPLOAD_ON_BRANCH \
+    -e CI \
+    -e FEEDSTOCK_NAME \
+    -e CPU_COUNT \
+    -e BUILD_WITH_CONDA_DEBUG \
+    -e BUILD_OUTPUT_ID \
+    -e flow_run_id \
+    -e remote_url \
+    -e sha \
+    -e BINSTAR_TOKEN \
+    -e FEEDSTOCK_TOKEN \
+    -e STAGING_BINSTAR_TOKEN \
+    "${DOCKER_IMAGE}" \
+    bash \
+    "/home/conda/feedstock_root/${PROVIDER_DIR}/build_steps.sh"
 
 # verify that the end of the script was reached
 test -f "$DONE_CANARY"
 
 # This closes the last group opened in `build_steps.sh`
-( endgroup "Final checks" ) 2> /dev/null
+(endgroup "Final checks") 2>/dev/null
