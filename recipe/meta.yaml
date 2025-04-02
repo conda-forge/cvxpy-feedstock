@@ -26,7 +26,9 @@ outputs:
         - {{ pin_subpackage('cvxpy-base', exact=True) }}
         - osqp >=0.6.2
         - clarabel >=0.5
-        - scs >=3.2.4
+        - scs >=3.2.4.post1
+        - numpy >= 1.21.6
+        - scipy >= 1.11.0
     test:
       requires:
         - pip
@@ -46,7 +48,7 @@ outputs:
         # accuracy failure on PPC, likely due to emulation
         {% set tests_to_skip = tests_to_skip + " or (TestDqcp and test_basic_multiply) " %}     # [ppc64le]
         {% set tests_to_skip = tests_to_skip + " or test_sparsity_condition " %}                # [py==313]
-        - pytest --capture=sys cvxpy/tests -v -k "not ({{ tests_to_skip }})"
+        - pytest -s cvxpy/tests -v -k "not ({{ tests_to_skip }})"
         # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
         # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
         - if [ 0 -eq $(pip list | grep "UNKNOWN" | wc -l) ]; then exit 0; else (pip list && exit 1); fi  # [unix]
