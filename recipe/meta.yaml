@@ -13,8 +13,8 @@ source:
 
 build:
   number: 0
-  # TODO: unskip; segfaults in test suite
-  skip: true  # [osx]
+  # debugging segfaults in test suite
+  skip: true  # [not osx]
 
 outputs:
   - name: cvxpy
@@ -26,7 +26,9 @@ outputs:
         - {{ pin_subpackage('cvxpy-base', exact=True) }}
         - osqp >=0.6.2
         - clarabel >=0.5
-        - scs >=3.2.4
+        - scs >=3.2.4.post1
+        - numpy >=1.21.6
+        - scipy >=1.11.0
     test:
       requires:
         - pip
@@ -45,8 +47,8 @@ outputs:
         {% set tests_to_skip = "_not_a_real_test" %}
         # accuracy failure on PPC, likely due to emulation
         {% set tests_to_skip = tests_to_skip + " or (TestDqcp and test_basic_multiply) " %}     # [ppc64le]
-        {% set tests_to_skip = tests_to_skip + " or test_sparsity_condition " %}                # [py==313] 
-        - pytest cvxpy/tests -v -k "not ({{ tests_to_skip }})"
+        {% set tests_to_skip = tests_to_skip + " or test_sparsity_condition " %}                # [py==313]
+        - pytest -s cvxpy/tests -v -k "not ({{ tests_to_skip }})"
         # test that pip recognizes installation correctly, see https://github.com/cvxpy/cvxpy/issues/2389;
         # 'grep -v' inverts the match but returns non-zero exit code if no lines are returned; so we use 'wc -l';
         - if [ 0 -eq $(pip list | grep "UNKNOWN" | wc -l) ]; then exit 0; else (pip list && exit 1); fi  # [unix]
@@ -71,10 +73,11 @@ outputs:
         # conda-forge recipe inserts oldest numpy per platform/runtime
         - numpy
         - pip
-        - setuptools
+        - wheel
+        - setuptools >=68.1.0
       run:
         - python
-        - scipy >=1.1.0
+        - scipy >=1.13.0
     test:
       imports:
         # public interface is defined (see #75) to be the content of
