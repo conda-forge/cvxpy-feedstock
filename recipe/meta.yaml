@@ -1,5 +1,5 @@
 {% set tests_to_skip = "_not_a_real_test" %}
-{% set version = "1.6.6" %}
+{% set version = "1.7.1" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: c1d7eb129f544e82484f1391bfdb0e614aefff518bad9b941d08153fbb1dbaab
+  sha256: ae28d4ddc76fef5f8b00c3e6bc8ece8c43bc5887144e7b86e1dd1fb95e0e5169
   patches:
     # test that fails due to timing issues on slow CI agents when in emulation
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
@@ -32,10 +32,10 @@ outputs:
       requires:
         - pip
         - pytest
-        - cvxopt
+        # issues with newer scipy and other libraries
+        # - cvxopt
         - hypothesis
-        # cvxopt appears to have issues with newer scipy
-        - scipy <1.15
+        - scipy
       source_files:
         - cvxpy/tests
       imports:
