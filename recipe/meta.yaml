@@ -32,7 +32,8 @@ outputs:
       requires:
         - pip
         - pytest
-        - cvxopt
+        # issues with newer scipy and other libraries
+        # - cvxopt
         - hypothesis
         - scipy
       source_files:
