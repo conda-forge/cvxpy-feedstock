@@ -34,8 +34,7 @@ outputs:
         - pytest
         - cvxopt
         - hypothesis
-        # cvxopt appears to have issues with newer scipy
-        - scipy <1.15
+        - scipy
       source_files:
         - cvxpy/tests
       imports:
