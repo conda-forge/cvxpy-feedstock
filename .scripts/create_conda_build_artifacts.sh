@@ -41,10 +41,7 @@ if [[ -z "${ARTIFACT_STAGING_DIR}" ]]; then
 fi
 echo "ARTIFACT_STAGING_DIR: $ARTIFACT_STAGING_DIR"
 
-FEEDSTOCK_ROOT=$(
-    cd "$(dirname "$0")/.."
-    pwd
-)
+FEEDSTOCK_ROOT=$(cd "$(dirname "$0")/.."; pwd;)
 if [ -z ${FEEDSTOCK_NAME} ]; then
     export FEEDSTOCK_NAME=$(basename ${FEEDSTOCK_ROOT})
 fi
@@ -64,7 +61,7 @@ if [[ ! -z "$BLD_ARTIFACT_PREFIX" ]]; then
     export BLD_ARTIFACT_NAME="${BLD_ARTIFACT_PREFIX}_${ARTIFACT_UNIQUE_ID}"
     export BLD_ARTIFACT_PATH="${ARTIFACT_STAGING_DIR}/${FEEDSTOCK_NAME}_${BLD_ARTIFACT_PREFIX}_${ARCHIVE_UNIQUE_ID}.zip"
 
-    (startgroup "Archive conda build directory") 2>/dev/null
+    ( startgroup "Archive conda build directory" ) 2> /dev/null
 
     # Try 7z and fall back to zip if it fails (for cross-platform use)
     if ! 7z a "$BLD_ARTIFACT_PATH" "$CONDA_BLD_DIR" '-xr!.git/' '-xr!_*_env*/' '-xr!*_cache/' -bb; then
@@ -73,7 +70,7 @@ if [[ ! -z "$BLD_ARTIFACT_PREFIX" ]]; then
         popd
     fi
 
-    (endgroup "Archive conda build directory") 2>/dev/null
+    ( endgroup "Archive conda build directory" ) 2> /dev/null
 
     echo "BLD_ARTIFACT_NAME: $BLD_ARTIFACT_NAME"
     echo "BLD_ARTIFACT_PATH: $BLD_ARTIFACT_PATH"
@@ -82,8 +79,8 @@ if [[ ! -z "$BLD_ARTIFACT_PREFIX" ]]; then
         echo "##vso[task.setVariable variable=BLD_ARTIFACT_NAME]$BLD_ARTIFACT_NAME"
         echo "##vso[task.setVariable variable=BLD_ARTIFACT_PATH]$BLD_ARTIFACT_PATH"
     elif [[ "$CI" == "github_actions" ]]; then
-        echo "BLD_ARTIFACT_NAME=$BLD_ARTIFACT_NAME" >>$GITHUB_OUTPUT
-        echo "BLD_ARTIFACT_PATH=$BLD_ARTIFACT_PATH" >>$GITHUB_OUTPUT
+        echo "BLD_ARTIFACT_NAME=$BLD_ARTIFACT_NAME" >> $GITHUB_OUTPUT
+        echo "BLD_ARTIFACT_PATH=$BLD_ARTIFACT_PATH" >> $GITHUB_OUTPUT
     fi
 fi
 
@@ -92,7 +89,7 @@ if [[ ! -z "$ENV_ARTIFACT_PREFIX" ]]; then
     export ENV_ARTIFACT_NAME="${ENV_ARTIFACT_PREFIX}_${ARTIFACT_UNIQUE_ID}"
     export ENV_ARTIFACT_PATH="${ARTIFACT_STAGING_DIR}/${FEEDSTOCK_NAME}_${ENV_ARTIFACT_PREFIX}_${ARCHIVE_UNIQUE_ID}.zip"
 
-    (startgroup "Archive conda build environments") 2>/dev/null
+    ( startgroup "Archive conda build environments" ) 2> /dev/null
 
     # Try 7z and fall back to zip if it fails (for cross-platform use)
     if ! 7z a "$ENV_ARTIFACT_PATH" -r "$CONDA_BLD_DIR"/'_*_env*/' -bb; then
@@ -101,7 +98,7 @@ if [[ ! -z "$ENV_ARTIFACT_PREFIX" ]]; then
         popd
     fi
 
-    (endgroup "Archive conda build environments") 2>/dev/null
+    ( endgroup "Archive conda build environments" ) 2> /dev/null
 
     echo "ENV_ARTIFACT_NAME: $ENV_ARTIFACT_NAME"
     echo "ENV_ARTIFACT_PATH: $ENV_ARTIFACT_PATH"
@@ -110,7 +107,7 @@ if [[ ! -z "$ENV_ARTIFACT_PREFIX" ]]; then
         echo "##vso[task.setVariable variable=ENV_ARTIFACT_NAME]$ENV_ARTIFACT_NAME"
         echo "##vso[task.setVariable variable=ENV_ARTIFACT_PATH]$ENV_ARTIFACT_PATH"
     elif [[ "$CI" == "github_actions" ]]; then
-        echo "ENV_ARTIFACT_NAME=$ENV_ARTIFACT_NAME" >>$GITHUB_OUTPUT
-        echo "ENV_ARTIFACT_PATH=$ENV_ARTIFACT_PATH" >>$GITHUB_OUTPUT
+        echo "ENV_ARTIFACT_NAME=$ENV_ARTIFACT_NAME" >> $GITHUB_OUTPUT
+        echo "ENV_ARTIFACT_PATH=$ENV_ARTIFACT_PATH" >> $GITHUB_OUTPUT
     fi
 fi
