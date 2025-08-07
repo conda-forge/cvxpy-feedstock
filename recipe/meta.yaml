@@ -14,8 +14,6 @@ source:
 
 build:
   number: 0
-  # TODO: unskip; segfaults in test suite
-  skip: true  # [osx]
 
 outputs:
   - name: cvxpy
@@ -55,6 +53,9 @@ outputs:
   - name: cvxpy-base
     build:
       script:
+        # if not in release mode, this may lead to issues, see
+        # https://github.com/cvxpy/cvxpy/issues/1690
+        - export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
         - rm $SRC_DIR/pyproject.toml    # [unix]
         - del %SRC_DIR%\pyproject.toml  # [win]
         - python -m pip install . --no-deps -vvv
