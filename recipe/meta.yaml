@@ -55,9 +55,9 @@ outputs:
       script:
         # if not in release mode, this may lead to issues, see
         # https://github.com/cvxpy/cvxpy/issues/1690
-        - export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
-        - rm $SRC_DIR/pyproject.toml    # [unix]
-        - del %SRC_DIR%\pyproject.toml  # [win]
+        - export CXXFLAGS="${CXXFLAGS} -DNDEBUG"    # [unix]
+        - rm $SRC_DIR/pyproject.toml                # [unix]
+        - del %SRC_DIR%\pyproject.toml              # [win]
         - python -m pip install . --no-deps -vvv
     requirements:
       build:
