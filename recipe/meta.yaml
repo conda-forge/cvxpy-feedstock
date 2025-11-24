@@ -1,5 +1,5 @@
 {% set tests_to_skip = "_not_a_real_test" %}
-{% set version = "1.7.2" %}
+{% set version = "1.7.4" %}
 
 package:
   name: cvxpy-split
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v{{ version }}.tar.gz
-  sha256: 269e9a5f41666e423160888214f56fa3a99df5b03c10456b1f9124241f267a88
+  sha256: 34bd6fc548daa2581356ff97471160c5cb1f01a6be595482dd84a797f45c8d61
   patches:
     # test that fails due to timing issues on slow CI agents when in emulation
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
