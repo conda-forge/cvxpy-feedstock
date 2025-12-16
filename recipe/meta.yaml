@@ -13,7 +13,7 @@ source:
     - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 0
+  number: 1
 
 outputs:
   - name: cvxpy
