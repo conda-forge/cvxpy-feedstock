@@ -3,6 +3,7 @@ context:
 
 recipe:
   name: cvxpy-split
+  version: ${{ version }}
 
 source:
   - url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v${{ version }}.tar.gz
