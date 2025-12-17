@@ -1,0 +1,132 @@
+context:
+  version: "1.7.5"
+
+recipe:
+  name: cvxpy-split
+  version: ${{ version }}
+
+source:
+  - url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v${{ version }}.tar.gz
+    sha256: 01b589b51a49ac8d1e4a41bf98ba4ed8048ce1ade2a8344f9b4fdb5574f0e9f4
+    patches:
+      # test that fails due to timing issues on slow CI agents when in emulation
+      - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
+
+build:
+  number: 1
+
+outputs:
+  - package:
+      name: cvxpy-base
+      version: ${{ version }}
+    build:
+      script:
+        # if not in release mode, this may lead to issues, see
+        # https://github.com/cvxpy/cvxpy/issues/1690
+        - if: unix
+          then:
+            - export CXXFLAGS="${CXXFLAGS} -DNDEBUG"
+            - rm $SRC_DIR/pyproject.toml
+          else:
+            - del %SRC_DIR%\pyproject.toml
+        - python -m pip install . --no-deps -vvv
+    requirements:
+      build:
+        - if: build_platform != target_platform
+          then:
+            - python
+            - cross-python_${{ target_platform }}
+            - numpy
+        - ${{ stdlib("c") }}
+        - ${{ compiler("c") }}
+        - ${{ compiler("cxx") }}
+      host:
+        - python
+        - pybind11
+        - numpy
+        - pip
+        - setuptools
+      run:
+        - python
+        - scipy >=1.1.0
+    tests:
+      - python:
+          imports:
+            # public interface is defined (see #75) to be the content of
+            # https://github.com/cvxpy/cvxpy/blob/master/cvxpy/__init__.py
+            - cvxpy
+      - package_contents:
+          site_packages:
+            # ensure that the package metadata did not mangle in the git hash
+            - cvxpy-${{ version }}.dist-info/METADATA
+
+  - package:
+      name: cvxpy
+      version: ${{ version }}
+    requirements:
+      host:
+        - python
+      run:
+        - python
+        - ${{ pin_subpackage('cvxpy-base', exact=True) }}
+        - osqp >=0.6.2
+        - clarabel >=0.5
+        - scs >=3.2.4
+    tests:
+      - python:
+          imports:
+            - cvxpy
+            - cvxpy.cvxcore
+            - cvxpy.cvxcore.python
+      - requirements:
+          run:
+            - pip
+            - pytest
+            # issues with newer scipy and other libraries
+            # - cvxopt
+            - hypothesis
+            - scipy
+        files:
+          source:
+            - cvxpy/tests
+        script:
+          interpreter: python
+          content:
+            - 'import pytest'
+            - 'import sys'
+            - 'tests_to_skip = "_not_a_real_test"'
+            # accuracy failure on PPC, likely due to emulation
+            - if: ppc64le
+              then:
+                - 'tests_to_skip += " or (TestDqcp and test_basic_multiply)"'
+            # test that fails on Python 3.13
+            - if: match(python, "==3.13")
+              then:
+                - 'tests_to_skip += " or test_sparsity_condition"'
+            - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "-k", f"not ({tests_to_skip})"]))'
+
+about:
+  homepage: http://www.cvxpy.org/
+  license: Apache-2.0
+  license_family: Apache
+  license_file: LICENSE
+  summary: A Python-embedded modeling language for convex optimization problems
+  description: |
+    CVXPY is a Python-embedded modeling language for convex optimization
+    problems. It allows you to express your problem in a natural way that
+    follows the math, rather than in the restrictive standard form required
+    by solvers.
+  documentation: http://www.cvxpy.org/
+  repository: https://github.com/cvxpy/cvxpy
+
+extra:
+  recipe-maintainers:
+    - timkpaine
+    - SteveDiamond
+    - akshayka
+    - rileyjmurray
+    - djsutherland
+    - mcg1969
+    - scopatz
+    - h-vetinari
+  feedstock-name: cvxpy
