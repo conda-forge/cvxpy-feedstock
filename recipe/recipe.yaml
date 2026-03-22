@@ -41,13 +41,13 @@ outputs:
         - ${{ compiler("c") }}
         - ${{ compiler("cxx") }}
       host:
-        - python >=3.11
+        - python
         - pybind11
         - numpy
         - pip
         - setuptools
       run:
-        - python >=3.11
+        - python
         - scipy >=1.1.0
     tests:
       - python:
