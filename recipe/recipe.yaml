@@ -1,5 +1,5 @@
 context:
-  version: "1.7.5"
+  version: "1.8.2"
 
 recipe:
   name: cvxpy-split
@@ -7,13 +7,13 @@ recipe:
 
 source:
   - url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 01b589b51a49ac8d1e4a41bf98ba4ed8048ce1ade2a8344f9b4fdb5574f0e9f4
+    sha256: 97acf67b4fb628c810f738279009c2933d4a20b8045a2724169c905c836e0947
     patches:
       # test that fails due to timing issues on slow CI agents when in emulation
       - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
 
 build:
-  number: 1
+  number: 0
 
 outputs:
   - package:
@@ -48,7 +48,7 @@ outputs:
         - setuptools
       run:
         - python
-        - scipy >=1.1.0
+        - scipy >=1.13.0
     tests:
       - python:
           imports:
@@ -69,7 +69,8 @@ outputs:
       run:
         - python
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
-        - osqp >=0.6.2
+        - highspy >=1.11.0
+        - osqp >=1.0.0
         - clarabel >=0.5
         - scs >=3.2.4
     tests:
@@ -122,6 +123,7 @@ about:
 extra:
   recipe-maintainers:
     - timkpaine
+    - PTNobel
     - SteveDiamond
     - akshayka
     - rileyjmurray
