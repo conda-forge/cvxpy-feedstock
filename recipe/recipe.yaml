@@ -48,7 +48,6 @@ outputs:
         - setuptools
       run:
         - python
-        - highspy >=1.11.0
         - scipy >=1.1.0
     tests:
       - python:
@@ -70,6 +69,7 @@ outputs:
       run:
         - python
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
+        - highspy >=1.11.0
         - osqp >=0.6.2
         - clarabel >=0.5
         - scs >=3.2.4
