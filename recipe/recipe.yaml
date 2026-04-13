@@ -71,8 +71,9 @@ outputs:
       run:
         - python
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
+        # default run-export of numpy is too loose (>=1.23,<3); cvxpy really needs >=2
         - numpy >=2
-        - highspy >=1.11.0
+        - highspy >=1.11.0,!=1.14.0
         - osqp >=1.0.0
         - clarabel >=0.5
         - scs >=3.2.4
