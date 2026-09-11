@@ -15,7 +15,7 @@ source:
       - patches/0002-disable-deadline-for-test_nd_bool_index.patch
 
 build:
-  number: 0
+  number: 1
   skip:
     - match(python, "<3.11")
 
@@ -78,7 +78,8 @@ outputs:
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
         - highspy >=1.14.0
         - osqp >=1.0.0
-        - clarabel >=0.5
+        - if: not is_freethreading
+          then: clarabel >=0.5
         - scs >=3.2.4
     tests:
       - python:
