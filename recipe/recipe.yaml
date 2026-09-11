@@ -76,10 +76,11 @@ outputs:
       run:
         - python
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
-        - highspy >=1.14.0
         - osqp >=1.0.0
         - if: not is_freethreading
-          then: clarabel >=0.5
+          then:
+            - clarabel >=0.5
+            - highspy >=1.14.0
         - scs >=3.2.4
     tests:
       - python:
