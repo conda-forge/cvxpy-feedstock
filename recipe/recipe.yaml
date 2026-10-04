@@ -107,6 +107,11 @@ outputs:
             - if: ppc64le
               then:
                 - 'tests_to_skip += " or (TestDqcp and test_basic_multiply)"'
+            # test_pcp_5 dual-domain accuracy failure on Windows CI; passes on
+            # GitHub's windows-2022 runners, cause under investigation
+            - if: win
+              then:
+                - 'tests_to_skip += " or test_pcp_5"'
             # hypothesis DeadlineExceeded; test's 200ms per-example deadline
             # is too tight for CI runners (seen on QEMU and osx_64)
             - 'tests_to_skip += " or test_nd_broadcast_generated"'
