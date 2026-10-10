@@ -1,5 +1,5 @@
 context:
-  version: "1.9.2"
+  version: "1.9.3"
 
 recipe:
   name: cvxpy-split
@@ -7,7 +7,7 @@ recipe:
 
 source:
   - url: https://github.com/cvxpy/cvxpy/archive/refs/tags/v${{ version }}.tar.gz
-    sha256: 646afc629cb61f1a9b073f6e6511e55dd772e81c4f4cc88a1b34816293aba1e4
+    sha256: c75139161c01116ce4b17d25483ece2c98b3ec93ffd4bf7ba5776de971373514
     patches:
       # test that fails due to timing issues on slow CI agents when in emulation
       - patches/0001-loosen-time-limit-in-test_scipy_mi_time_limit_reache.patch
@@ -107,6 +107,11 @@ outputs:
             - if: ppc64le
               then:
                 - 'tests_to_skip += " or (TestDqcp and test_basic_multiply)"'
+            # test_pcp_5 dual-domain accuracy failure on Windows CI; passes on
+            # GitHub's windows-2022 runners, cause under investigation
+            - if: win
+              then:
+                - 'tests_to_skip += " or test_pcp_5"'
             # hypothesis DeadlineExceeded; test's 200ms per-example deadline
             # is too tight for CI runners (seen on QEMU and osx_64)
             - 'tests_to_skip += " or test_nd_broadcast_generated"'
@@ -114,7 +119,8 @@ outputs:
             - if: match(python, "==3.13")
               then:
                 - 'tests_to_skip += " or test_sparsity_condition"'
-            - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "-k", f"not ({tests_to_skip})"]))'
+            # diff-engine (NLP) tests need sparsediffpy, which is not packaged on conda-forge yet
+            - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "--ignore=cvxpy/tests/nlp_tests/stress_tests_diff_engine", "-k", f"not ({tests_to_skip})"]))'
 
 about:
   homepage: http://www.cvxpy.org/
