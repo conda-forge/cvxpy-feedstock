@@ -121,6 +121,9 @@ outputs:
             - if: match(python, "==3.13")
               then:
                 - 'tests_to_skip += " or test_sparsity_condition"'
+            - if: is_freethreading
+              then:
+                - 'tests_to_skip += " or ClarabelTest"'
             # diff-engine (NLP) tests need sparsediffpy, which is not packaged on conda-forge yet
             - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "--ignore=cvxpy/tests/nlp_tests/stress_tests_diff_engine", "-k", f"not ({tests_to_skip})"]))'
 
