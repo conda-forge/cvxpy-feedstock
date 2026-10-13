@@ -123,7 +123,7 @@ outputs:
                 - 'tests_to_skip += " or test_sparsity_condition"'
             - if: is_freethreading
               then:
-                - 'tests_to_skip += " or ClarabelTest"'
+                - rm cvxpy/tests/test_clarabel.py
             # diff-engine (NLP) tests need sparsediffpy, which is not packaged on conda-forge yet
             - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "--ignore=cvxpy/tests/nlp_tests/stress_tests_diff_engine", "-k", f"not ({tests_to_skip})"]))'
 
