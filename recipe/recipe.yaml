@@ -70,6 +70,8 @@ outputs:
   - package:
       name: cvxpy
       version: ${{ version }}
+    build:
+      skip: is_freethreading
     requirements:
       host:
         - python
@@ -77,10 +79,8 @@ outputs:
         - python
         - ${{ pin_subpackage('cvxpy-base', exact=True) }}
         - osqp >=1.0.0
-        - if: not is_freethreading
-          then:
-            - clarabel >=0.5
-            - highspy >=1.14.0
+        - clarabel >=0.5
+        - highspy >=1.14.0
         - scs >=3.2.4
     tests:
       - python:
@@ -121,10 +121,6 @@ outputs:
             - if: match(python, "==3.13")
               then:
                 - 'tests_to_skip += " or test_sparsity_condition"'
-            - if: is_freethreading
-              then:
-                - 'import os'
-                - 'os.remove("cvxpy/tests/test_clarabel.py")'
             # diff-engine (NLP) tests need sparsediffpy, which is not packaged on conda-forge yet
             - 'sys.exit(pytest.main(["-v", "cvxpy/tests", "--ignore=cvxpy/tests/nlp_tests/stress_tests_diff_engine", "-k", f"not ({tests_to_skip})"]))'
 
