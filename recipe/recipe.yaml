@@ -15,7 +15,7 @@ source:
       - patches/0002-disable-deadline-for-test_nd_bool_index.patch
 
 build:
-  number: 0
+  number: 1
   skip:
     - match(python, "<3.11")
 
@@ -70,6 +70,9 @@ outputs:
   - package:
       name: cvxpy
       version: ${{ version }}
+    build:
+      # clarabel and highspy are not available yet
+      skip: is_freethreading
     requirements:
       host:
         - python
